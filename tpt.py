@@ -43,12 +43,15 @@ import requests.utils
 
 
 class TPT(object):
+    """A simple bot to automatically lock and delete old threads
+    that haven't had any replies
+    """
     # Variables used in the source
     lockMsg = ''.join(tpt['lockmsg'])
     key = tpt['key']
     referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
     referer += '?Group=832'
-    whitelist = tpt['whitelist']
+    white = tpt['whitelist']
     session = requests.Session()
     if not os.path.isfile('cookies'):
         data = {
@@ -67,12 +70,18 @@ class TPT(object):
             session.cookies.set(cookies.keys()[0], cookies.values()[0])
 
     def whitelist(self, threadNum):
-        for a in self.whitelist:
+        """<thread number>
+
+        Returns if a given thread is in the whitelist"""
+        for a in self.white:
             if threadNum == a:
                 return True
         return False
 
     def postRequest(self, url, headers, data, params=None):
+        """<url> <headers> <POST data> [<URL parameters>]
+
+        Wrapper function to do a POST request"""
         if params:
             return self.session.request(
                 'POST', url, headers=headers, data=data, allow_redirects=True,
@@ -83,6 +92,9 @@ class TPT(object):
                 allow_redirects=True).raise_for_status()
 
     def threadModeration(self, type, threadNum, modKey):
+        """<type> <thread number> <moderation key>
+
+        Function to send the correct POST request to lock or delete a thread"""
         # Example headers (includes server response headers):
         # http://hastebin.com/isugujeyeg.txt
         referer = self.referer
@@ -109,6 +121,9 @@ class TPT(object):
                          params=params)
 
     def threadPost(self, message, threadNum, key):
+        """<message> <thread number> <user key>
+
+        Function to add a post to a thread"""
         # Example headers (includes server response headers):
         # http://hastebin.com/epidazekah.txt
         referer = self.referer + '&Thread={0}'.format(threadNum)
@@ -129,6 +144,9 @@ class TPT(object):
                          params=params)
 
     def timestr_to_obj(datetime_str):
+        """<date>
+
+        Converts a date string to a datetime.datetime object"""
         # Current date and time in UTC
         datetime_now = datetime.utcnow()
         # Current date in "Day Month" format
@@ -166,6 +184,10 @@ class TPT(object):
         return datetime_obj
 
     def days_between(date):
+        """<date>
+
+        Calculate the difference in days between a given date
+        and the current UTC date"""
         d1 = datetime.strptime(date, '%Y-%m-%d')
         d2 = datetime.strptime(datetime.utcnow(), '%Y-%m-%d')
         return abs((d2 - d1).days)

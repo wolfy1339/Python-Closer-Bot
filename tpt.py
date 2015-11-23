@@ -78,18 +78,13 @@ class TPT(object):
                 return True
         return False
 
-    def postRequest(self, url, headers, data, params=None):
+    def postRequest(self, url, headers, data, params=None, **kwargs):
         """<url> <headers> <POST data> [<URL parameters>]
 
         Wrapper function to do a POST request"""
-        if params:
-            return self.session.request(
+        return self.session.request(
                 'POST', url, headers=headers, data=data, allow_redirects=True,
-                params=params).raise_for_status()
-        else:
-            return self.session.request(
-                'POST', url, headers=headers, data=data,
-                allow_redirects=True).raise_for_status()
+                params=params, **kwargs)
 
     def threadModeration(self, type, threadNum, modKey):
         """<type> <thread number> <moderation key>

@@ -69,7 +69,7 @@ class TPT(object):
     else:
         with open('cookies') as f:
             cookies = requests.utils.cookiejar_from_dict(pickle.load(f))
-            session.cookies.set(cookies.keys()[0], cookies.values()[0])
+            session.cookies.set(list(cookies.keys())[0], list(cookies.values())[0])
 
     def whitelist(self, threadNum):
         """<thread number>
@@ -191,7 +191,7 @@ class TPT(object):
         d2 = datetime.strptime(datetime.utcnow(), '%Y-%m-%d')
         return abs((d2 - d1).days)
 
-    for i in range(0, 10):
+    for i in list(range(0, 10)):
         params = {
             'Group': '832',
             'PageNum': i

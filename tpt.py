@@ -59,8 +59,10 @@ class TPT(object):
             'pass': tpt['password'],
             'Remember': 'Yes'
         }
-        response = session.post(
-            'https://powdertoy.co.uk/Login.html', data=data)
+        response = session.request(
+            'POST', 'https://powdertoy.co.uk/Login.html', data=data)
+        response.prepare()
+        response.raise_for_status()
         with open('cookies', 'w+') as f:
             pickle.dump(
                 requests.utils.dict_from_cookiejar(session.cookies), f)
@@ -82,9 +84,11 @@ class TPT(object):
         """<url> <headers> <POST data> [<URL parameters>]
 
         Wrapper function to do a POST request"""
-        return self.session.request(
+        req = self.session.request(
                 'POST', url, headers=headers, data=data, allow_redirects=True,
                 params=params, **kwargs)
+        req.prepare()
+        return req.raise_for_status()
 
     def threadModeration(self, type, threadNum, modKey):
         """<type> <thread number> <moderation key>

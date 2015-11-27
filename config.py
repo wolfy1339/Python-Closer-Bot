@@ -1,3 +1,4 @@
+"""Config file for the BMN Python Thread Closer Bot"""
 import json
 with open("config.json") as config_file:
     config = json.load(config_file)

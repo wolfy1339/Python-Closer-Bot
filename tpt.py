@@ -63,7 +63,6 @@ class TPT(object):
         }
         response = session.request(
             'POST', 'https://powdertoy.co.uk/Login.html', data=data)
-        response.prepare()
         response.raise_for_status()
         with open('cookies', 'w+') as f:
             pickle.dump(
@@ -72,7 +71,8 @@ class TPT(object):
         logging.info('\'cookies file\' found!')
         with open('cookies') as f:
             cookies = requests.utils.cookiejar_from_dict(pickle.load(f))
-            session.cookies.set(list(cookies.keys())[0], list(cookies.values())[0])
+            session.cookies.set(list(cookies.keys())[0],
+                                list(cookies.values())[0])
 
     def whitelist(self, threadNum):
         """<thread number>
@@ -83,14 +83,13 @@ class TPT(object):
                 return True
         return False
 
-    def postRequest(self, url, headers, data, params=None, **kwargs):
+    def postRequest(self, url, data, headers=None, params=None, **kwargs):
         """<url> <headers> <POST data> [<URL parameters>]
 
         Wrapper function to do a POST request"""
         req = self.session.request(
                 'POST', url, headers=headers, data=data, allow_redirects=True,
                 params=params, **kwargs)
-        req.prepare()
         return req.raise_for_status()
 
     def threadModeration(self, type, threadNum, modKey):
@@ -201,6 +200,7 @@ class TPT(object):
         }
         groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
         page = session.get(groupURL, params=params)
+        page.raise_for_status()
         soup = BeautifulSoup(page.text, "html5lib")
 
         # Get all links in ul.TopiList#TopicList
@@ -211,26 +211,22 @@ class TPT(object):
         threads = [i["href"].split('&Thread=')[1] for i in title]
         dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
 
-        for i in range(0, len(dates)):
+        for i in list(range(0, len(dates))):
             threadData.append([threads[i], dates[i]])
 
-        for e in range(0, len(threadData)):
+        for e in list(range(0, len(threadData))):
             threadNum = threadData[e][0]
             date = timestr_to_obj(threadData[e][1])
 
             if days_between(date) >= 182 and not whitelist(threadNum):
                 # Lock thread
-                logging.info('Locking thread {0} ({1})'.format(
-                    threadNum,
-                    [title[i].split(">")[1].split("<")[0] for i in range(
-                        0, len(title))])
+                logging.info('Locking thread {0} ({1})'.format(threadNum,
+                             [title[i].text for i in e]))
                 threadPost(lockMsg, threadNum, key)
                 threadModeration('lock', threadNum, key)
             elif days_between(date) >= 200 and not whitelist(threadNum):
-                logging.info('Deleting thread {0} ({1})'.format(
-                    threadNum,
-                    [title[i].split(">")[1].split("<")[0] for i in range(
-                        0, len(title))])
+                logging.info('Deleting thread {0} ({1})'.format(threadNum,
+                             [title[i].text for i in e]))
                 threadModeration('delete', threadNum, key)
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

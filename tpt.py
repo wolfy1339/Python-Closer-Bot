@@ -189,8 +189,8 @@ class TPT(object):
 
         Calculate the difference in days between a given date
         and the current UTC date"""
-        d1 = datetime.strptime(date, '%Y-%m-%d')
-        d2 = datetime.strptime(datetime.utcnow(), '%Y-%m-%d')
+        d1 = datetime.strptime(str(date, '%Y-%m-%d')
+        d2 = datetime.strptime(str(datetime.utcnow()), '%Y-%m-%d')
         return abs((d2 - d1).days)
 
     for i in list(range(0, 10)):
@@ -221,12 +221,12 @@ class TPT(object):
             if days_between(date) >= 182 and not whitelist(threadNum):
                 # Lock thread
                 logging.info('Locking thread {0} ({1})'.format(threadNum,
-                             [title[i].text for i in e]))
+                             title[e].text))
                 threadPost(lockMsg, threadNum, key)
                 threadModeration('lock', threadNum, key)
             elif days_between(date) >= 200 and not whitelist(threadNum):
                 logging.info('Deleting thread {0} ({1})'.format(threadNum,
-                             [title[i].text for i in e]))
+                             title[e].text))
                 threadModeration('delete', threadNum, key)
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

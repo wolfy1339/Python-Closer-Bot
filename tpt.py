@@ -49,7 +49,6 @@ class TPT(object):
     """
     # Variables used in the source
     lockMsg = ''.join(tpt['lockmsg'])
-    key = tpt['key']
     referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
     referer += '?Group=832'
     white = tpt['whitelist']
@@ -189,7 +188,7 @@ class TPT(object):
 
         Calculate the difference in days between a given date
         and the current UTC date"""
-        d1 = datetime.strptime(str(date, '%Y-%m-%d')
+        d1 = datetime.strptime(str(date, '%Y-%m-%d'))
         d2 = datetime.strptime(str(datetime.utcnow()), '%Y-%m-%d')
         return abs((d2 - d1).days)
 
@@ -210,6 +209,9 @@ class TPT(object):
         title = soup.find_all('a', {'class': 'Title'})
         threads = [i["href"].split('&Thread=')[1] for i in title]
         dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
+        # Fetch key from page since the key seems to change sometimes
+        key = soup.find_all('form', {'class': 'PostFForm'})[0]['action'].split(
+            '&Key=')[1]
 
         for i in list(range(0, len(dates))):
             threadData.append([threads[i], dates[i]])

@@ -21,7 +21,6 @@
   },
   "prefix": "@",
   "tpt": {
-    "key": "9F75A5D17D",
     "lockmsg": [
       "<p>Hey there!</p>",
       "<p>We're automatically closing this thread since the original poster ",
@@ -34,7 +33,7 @@
     ],
     "password": "BrilliantMinds!",
     "username": "BMNNation",
-    "whitelist": [ "1427", "2202", "" ]
+    "whitelist": [ "1427", "2202", "2228" ]
   },
   "user": {
     "ident": "python",

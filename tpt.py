@@ -53,6 +53,9 @@ class TPT(object):
     referer += '?Group=832'
     white = tpt['whitelist']
     session = requests.Session()
+
+    logging.setLevel('INFO')
+
     if not os.path.isfile('cookies'):
         logging.info('cookies file not found, creating one for you')
         data = {
@@ -97,10 +100,10 @@ class TPT(object):
         Function to send the correct POST request to lock or delete a thread"""
         # Example headers (includes server response headers):
         # http://hastebin.com/isugujeyeg.txt
-        referer = self.referer
-        referer += '&Thread={0}'.format(threadNum)
+        ref = self.referer
+        ref += '&Thread={0}'.format(threadNum)
         headers = {
-            'Referer': referer
+            'Referer': ref
         }
         if type.lower() == 'lock':
             data = {
@@ -126,9 +129,9 @@ class TPT(object):
         Function to add a post to a thread"""
         # Example headers (includes server response headers):
         # http://hastebin.com/epidazekah.txt
-        referer = self.referer + '&Thread={0}'.format(threadNum)
+        ref = self.referer + '&Thread={0}'.format(threadNum)
         headers = {
-            'Referer': referer
+            'Referer': ref
         }
         data = {
             'Thread': threadNum,
@@ -206,29 +209,35 @@ class TPT(object):
         # <ul id="TopicList" class="TopicList">
 
         threadData = []
-        title = soup.find_all('a', {'class': 'Title'})
+        title = [i.text for i in soup.find_all('a', {'class': 'Title'})]
         threads = [i["href"].split('&Thread=')[1] for i in title]
         dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
         # Fetch key from page since the key seems to change sometimes
-        key = soup.find_all('form', {'class': 'PostFForm'})[0]['action'].split(
+        key = soup.find('form', {'class': 'PostFForm'})['action'].split(
             '&Key=')[1]
 
         for i in list(range(0, len(dates))):
-            threadData.append([threads[i], dates[i]])
+            threadData.append([threads[i], title[i], dates[i]])
 
         for e in list(range(0, len(threadData))):
             threadNum = threadData[e][0]
-            date = timestr_to_obj(threadData[e][1])
+            title = threadData[e][1]
+            date = timestr_to_obj(threadData[e][2])
 
-            if days_between(date) >= 182 and not whitelist(threadNum):
-                # Lock thread
-                logging.info('Locking thread {0} ({1})'.format(threadNum,
-                             title[e].text))
-                threadPost(lockMsg, threadNum, key)
-                threadModeration('lock', threadNum, key)
-            elif days_between(date) >= 200 and not whitelist(threadNum):
-                logging.info('Deleting thread {0} ({1})'.format(threadNum,
-                             title[e].text))
-                threadModeration('delete', threadNum, key)
+            if not whitelist(threadNum):
+                if days_between(date) >= 182:
+                    # Lock thread if it isn't already
+                    if (soup.find('div',
+                                  {'class': 'Warning alert alert-warning'})):
+                        logging.info('Locking thread {0} ({1})'.format(threadNum,
+                                     title))
+                        threadPost(lockMsg, threadNum, key)
+                        threadModeration('lock', threadNum, key)
+                elif days_between(date) >= 200:
+                    logging.info('Deleting thread {0} ({1})'.format(threadNum,
+                                 title))
+                    threadModeration('delete', threadNum, key)
+            else:
+                logging.info('Thread {0} ({1}) is whitelisted and hence not locked or deleted'.format(threadData[0], threadData[1]))
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

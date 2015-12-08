@@ -100,25 +100,26 @@ class TPT(object):
         Function to send the correct POST request to lock or delete a thread"""
         # Example headers (includes server response headers):
         # http://hastebin.com/isugujeyeg.txt
-        ref = self.referer
-        ref += '&Thread={0}'.format(threadNum)
-        headers = {
-            'Referer': ref
-        }
         if type.lower() == 'lock':
             data = {
                 'Moderation_Lock': 'Lock'
             }
+            ref = self.referer
+            ref += '&Thread={0}'.format(threadNum)
         elif type.lower() == 'delete':
             data = {
                 'Moderation_Delete': 'true',
                 'Moderation_DeleteConfirm': 'Delete Thread'
             }
+            ref = 'http://powdertoy.co.uk/Groups/Thread/Moderation.html?Group=832&Thread={0}&Key={1}'.format(threadNum, modKey)
         moderationURL = 'http://powdertoy.co.uk/Groups/Thread/Moderation.html'
         params = {
             'Group': '832',
             'Thread': threadNum,
             'Key': modKey
+        }
+        headers = {
+            'Referer': ref
         }
         self.postRequest(moderationURL, headers=headers, data=data,
                          params=params)
@@ -227,8 +228,9 @@ class TPT(object):
             if not whitelist(threadNum):
                 if days_between(date) >= 182:
                     # Lock thread if it isn't already
-                    if (soup.find('div',
-                                  {'class': 'Warning alert alert-warning'})):
+                    alert = soup.find('div',
+                                  {'class': 'Warning alert alert-warning'})
+                    if alert == -1:
                         logging.info('Locking thread {0} ({1})'.format(threadNum,
                                      title))
                         threadPost(lockMsg, threadNum, key)

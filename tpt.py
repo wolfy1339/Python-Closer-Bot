@@ -100,6 +100,7 @@ class TPT(object):
         Function to send the correct POST request to lock or delete a thread"""
         # Example headers (includes server response headers):
         # http://hastebin.com/isugujeyeg.txt
+        moderationURL = 'http://powdertoy.co.uk/Groups/Thread/Moderation.html'
         if type.lower() == 'lock':
             data = {
                 'Moderation_Lock': 'Lock'
@@ -111,8 +112,9 @@ class TPT(object):
                 'Moderation_Delete': 'true',
                 'Moderation_DeleteConfirm': 'Delete Thread'
             }
-            ref = 'http://powdertoy.co.uk/Groups/Thread/Moderation.html?Group=832&Thread={0}&Key={1}'.format(threadNum, modKey)
-        moderationURL = 'http://powdertoy.co.uk/Groups/Thread/Moderation.html'
+            ref = moderationURL
+            ref += '?Group=832&Thread={0}&Key={1}'.format(threadNum, modKey)
+
         params = {
             'Group': '832',
             'Thread': threadNum,
@@ -204,7 +206,7 @@ class TPT(object):
         groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
         page = session.get(groupURL, params=params)
         page.raise_for_status()
-        soup = BeautifulSoup(page.text, "html5lib")
+        soup = BeautifulSoup(page.text, 'html5lib')
 
         # Get all links in ul.TopiList#TopicList
         # <ul id="TopicList" class="TopicList">
@@ -229,7 +231,7 @@ class TPT(object):
                 if days_between(date) >= 182:
                     # Lock thread if it isn't already
                     alert = soup.find('div',
-                                  {'class': 'Warning alert alert-warning'})
+                                      {'class': 'Warning alert alert-warning'})
                     if alert == -1:
                         logging.info('Locking thread {0} ({1})'.format(threadNum,
                                      title))
@@ -240,6 +242,8 @@ class TPT(object):
                                  title))
                     threadModeration('delete', threadNum, key)
             else:
-                logging.info('Thread {0} ({1}) is whitelisted and hence not locked or deleted'.format(threadData[0], threadData[1]))
+                logging.info(('Thread {0} ({1}) is whitelisted and hence '
+                             'not locked or deleted').format(threadData[0],
+                                                            threadData[1]))
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

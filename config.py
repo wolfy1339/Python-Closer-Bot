@@ -26,8 +26,3 @@ errorCode = """with socket.socket() as sock:
     sock.connect(("termbin.com", 9999))
     sock.send(traceback.format_exc().encode("utf-8", "replace"))
     SendMessage(errorchannel, "Error: " + sock.recv(1024).decode("utf-8"))"""
-
-if config["configured"] == "True":
-    configured = True
-else:
-    configured = False

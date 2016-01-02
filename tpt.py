@@ -209,16 +209,16 @@ class TPT(object):
 
         threadData = []
         title = [i.text for i in soup.find_all('a', {'class': 'Title'})]
-        threads = [title[i]["href"].split('&Thread=')[1] for i in list(range(0, len(title)))]
+        threads = [title[i]["href"].split('&Thread=')[1] for i in list(range(len(title)))]
         dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
         # Fetch key from page since the key seems to change sometimes
         key = soup.find('form', {'class': 'PostFForm'})['action'].split(
             '&Key=')[1]
 
-        for i in list(range(0, len(dates))):
+        for i in list(range(len(dates))):
             threadData.append([threads[i], title[i], dates[i]])
 
-        for e in list(range(0, len(threadData))):
+        for e in list(range(len(threadData))):
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = timestr_to_obj(threadData[e][2])

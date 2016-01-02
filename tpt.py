@@ -36,7 +36,6 @@
 from bs4 import BeautifulSoup
 from config import tpt
 from datetime import datetime
-import logging
 import os
 import pickle
 import requests
@@ -54,10 +53,8 @@ class TPT(object):
     white = tpt['whitelist']
     session = requests.Session()
 
-    logging.setLevel('INFO')
 
     if not os.path.isfile('cookies'):
-        logging.info('cookies file not found, creating one for you')
         data = {
             'name': tpt['username'],
             'pass': tpt['password'],
@@ -70,7 +67,6 @@ class TPT(object):
             pickle.dump(
                 requests.utils.dict_from_cookiejar(session.cookies), f)
     else:
-        logging.info('\'cookies file\' found!')
         with open('cookies') as f:
             cookies = requests.utils.cookiejar_from_dict(pickle.load(f))
             session.cookies.set(list(cookies.keys())[0],
@@ -233,17 +229,11 @@ class TPT(object):
                     alert = soup.find('div',
                                       {'class': 'Warning alert alert-warning'})
                     if alert == -1:
-                        logging.info('Locking thread {0} ({1})'.format(threadNum,
-                                     title))
                         threadPost(lockMsg, threadNum, key)
                         threadModeration('lock', threadNum, key)
                 elif days_between(date) >= 200:
                     logging.info('Deleting thread {0} ({1})'.format(threadNum,
                                  title))
                     threadModeration('delete', threadNum, key)
-            else:
-                logging.info(('Thread {0} ({1}) is whitelisted and hence '
-                             'not locked or deleted').format(threadData[0],
-                                                            threadData[1]))
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

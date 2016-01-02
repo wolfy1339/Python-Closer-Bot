@@ -209,7 +209,7 @@ class TPT(object):
 
         threadData = []
         title = [i.text for i in soup.find_all('a', {'class': 'Title'})]
-        threads = [i["href"].split('&Thread=')[1] for i in title]
+        threads = [title[i]["href"].split('&Thread=')[1] for i in list(range(0, len(title)))]
         dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
         # Fetch key from page since the key seems to change sometimes
         key = soup.find('form', {'class': 'PostFForm'})['action'].split(
@@ -227,13 +227,11 @@ class TPT(object):
                 if days_between(date) >= 182:
                     # Lock thread if it isn't already
                     alert = soup.find('div',
-                                      {'class': 'Warning alert alert-warning'})
+                                      {'class': 'Warning'})
                     if alert == -1:
                         threadPost(lockMsg, threadNum, key)
                         threadModeration('lock', threadNum, key)
                 elif days_between(date) >= 200:
-                    logging.info('Deleting thread {0} ({1})'.format(threadNum,
-                                 title))
                     threadModeration('delete', threadNum, key)
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

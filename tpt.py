@@ -53,7 +53,6 @@ class TPT(object):
     white = tpt['whitelist']
     session = requests.Session()
 
-
     if not os.path.isfile('cookies'):
         data = {
             'name': tpt['username'],
@@ -209,7 +208,8 @@ class TPT(object):
 
         threadData = []
         title = [i.text for i in soup.find_all('a', {'class': 'Title'})]
-        threads = [title[i]["href"].split('&Thread=')[1] for i in list(range(len(title)))]
+        length = list(range(len(title)))
+        threads = [title[i]["href"].split('&Thread=')[1] for i in length]
         dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
         # Fetch key from page since the key seems to change sometimes
         key = soup.find('form', {'class': 'PostFForm'})['action'].split(

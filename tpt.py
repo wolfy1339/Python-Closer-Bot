@@ -232,6 +232,7 @@ class TPT(object):
                         threadPost(lockMsg, threadNum, key)
                         threadModeration('lock', threadNum, key)
                 elif days_between(date) >= 200:
+                    open(threadNum + '-backup.html', 'w+').write(str(soup))
                     threadModeration('delete', threadNum, key)
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

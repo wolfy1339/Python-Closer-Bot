@@ -227,12 +227,12 @@ class TPT(object):
             newpath = r'Backups/' + str(threadNum) 
             if not os.path.exists(newpath):
                 os.makedirs(newpath)
-            
+
             params = {
                 'Group': config.groupId,
                 'PageNum': i
             }
-            
+
             #Get html from page replace links with saved copu
             groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
             page = self.session.get(url)
@@ -240,16 +240,16 @@ class TPT(object):
             if page.text.find('<div id="MessageContainer') == -1:
                 break
             open("Backups/" + threadNum + "/" + threadNum + '-backup page-'+ str(i) +'.html', 'w+').write(page.text)
-    
+
     def mergeSort(alist): #Ahh the internet where you can steal code for any algorithim
         if len(alist)>1:
             mid = len(alist)//2
             lefthalf = alist[:mid]
             righthalf = alist[mid:]
-    
+
             mergeSort(lefthalf)
             mergeSort(righthalf)
-    
+
             i=0
             j=0
             k=0
@@ -262,23 +262,23 @@ class TPT(object):
                     alist[k]=righthalf[j]
                     j=j+1
                 k=k+1
-    
+
             while i < len(lefthalf):
                 alist[k]=lefthalf[i]
                 i=i+1
                 k=k+1
-    
+
             while j < len(righthalf):
                 alist[k]=righthalf[j]
                 j=j+1
                 k=k+1
         return alist
-        
+
     def binarySearch(sequence, value): #Modified binary search
         lo, hi = 0, len(sequence) - 1
         while lo <= hi:
             mid = (lo + hi) / 2
-    
+
             if int(sequence[mid]) < int(value):
                 lo = mid + 1
             elif int(value) < int(sequence[mid]):

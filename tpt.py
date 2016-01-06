@@ -206,16 +206,17 @@ class TPT(object):
                 date = timestr_to_obj(threadData[e][2])
     
                 if not whitelist(threadNum):
-                    if daysBetween(date) >= 182:
+                    if daysBetween(date) >= 200:
+                        self.threadBackup(threadNum)
+                        threadModeration('delete', threadNum, key)
+                    elif daysBetween(date) >= 182:
                         # Lock thread if it isn't already
                         alert = soup.find('div',
                                           {'class': 'Warning'})
                         if alert == -1:
                             threadPost(lockMsg, threadNum, key)
                             threadModeration('lock', threadNum, key)
-                    elif daysBetween(date) >= 200:
-                        open(threadNum + '-backup.html', 'w+').write(str(soup))
-                        threadModeration('delete', threadNum, key)
+
 
     def threadBackup(self, threadNum):
         """<threadNum>
@@ -223,7 +224,7 @@ class TPT(object):
         Make a backup of a specified thread.
         It will download all the HTML from all pages and save it in the backup folder
         """
-        for i in range(100):
+        for i in range(500):
             url = "http://powdertoy.co.uk/Groups/Thread/View.html?Group={0}&Thread={1}&PageNum={2}".format(tpt['groupID'], threadNum, i)
             # Save the html to a folder under "backups" named the threadNum
             newpath = r'Backups/' + str(threadNum) 

@@ -245,6 +245,6 @@ class TPT(object):
 
 a = TPT()
 a.cleanThreads()
-a.threadBackup()
+
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

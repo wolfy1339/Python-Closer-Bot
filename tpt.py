@@ -37,9 +37,7 @@ from bs4 import BeautifulSoup
 from config import tpt
 from datetime import datetime
 import os
-import pickle
 import requests
-import requests.utils
 
 
 class TPT(object):
@@ -47,29 +45,22 @@ class TPT(object):
     that haven't had any replies
     """
     # Variables used in the source
-    lockMsg = ''.join(tpt['lockmsg'])
-    referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
-    referer += '?Group=832'
-    white = tpt['whitelist']
-    session = requests.Session()
+    def __init__(self):
+        self.lockMsg = ''.join(tpt['lockmsg'])
+        self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
+        self.referer += '?Group={0}'.format(tpt['groupID'])
+        self.white = tpt['whitelist']
+        self.session = requests.Session()
 
-    if not os.path.isfile('cookies'):
         data = {
             'name': tpt['username'],
             'pass': tpt['password'],
             'Remember': 'Yes'
         }
-        response = session.request(
+        response = self.session.request(
             'POST', 'https://powdertoy.co.uk/Login.html', data=data)
         response.raise_for_status()
-        with open('cookies', 'w+') as f:
-            pickle.dump(
-                requests.utils.dict_from_cookiejar(session.cookies), f)
-    else:
-        with open('cookies') as f:
-            cookies = requests.utils.cookiejar_from_dict(pickle.load(f))
-            session.cookies.set(list(cookies.keys())[0],
-                                list(cookies.values())[0])
+        self.key = BeautifulSoup(response.text).find('ul', {'class': 'dropdown-menu').findAll('li', {'class': 'item'})[4].find('a')['href'].split('&Key=')[0]
 
     def whitelist(self, threadNum):
         """<thread number>
@@ -108,10 +99,10 @@ class TPT(object):
                 'Moderation_DeleteConfirm': 'Delete Thread'
             }
             ref = moderationURL
-            ref += '?Group=832&Thread={0}&Key={1}'.format(threadNum, modKey)
+            ref += '?Group={0}&Thread={0}&Key={2}'.format(tpt['groupID'], threadNum, modKey)
 
         params = {
-            'Group': '832',
+            'Group': tpt['groupID'],
             'Thread': threadNum,
             'Key': modKey
         }
@@ -138,101 +129,122 @@ class TPT(object):
         }
         threadPostURL = 'http://powdertoy.co.uk/Groups/Thread/Reply.html'
         params = {
-            'Group': '832',
+            'Group': tpt['groupID'],
             'Key': key
         }
         self.postRequest(threadPostURL, headers=headers, data=data,
                          params=params)
 
-    def timestr_to_obj(datetime_str):
-        """<date>
-
-        Converts a date string to a datetime.datetime object"""
-        # Current date and time in UTC
-        datetime_now = datetime.utcnow()
-        # Current date in "Day Month" format
-        current_date = datetime_now.strftime("%d %B")
-        # Current year
-        current_year = datetime_now.strftime("%Y")
-
-        # Check if the datetime string is in the format "Hour:Minute:Year"
-        if ":" in datetime_str:
-            # Convert it to "Hour:Minute:year Day Month Year"
-            datetime_str = "{0} {1} {2}".format(
-                datetime_str, current_date, current_year)
-
-        # Check if the datetime string is in the format
-        # "Day(st|nd|rd|th) Month"
-        elif datetime_str[0].isdigit():
-            # Remove the ordinal indicator
-            datetime_str = re.sub(r"^(\d+)(st|nd|rd|th)", r"\1", datetime_str)
-            # The day must be a zero-padded decimal number
-            if datetime_str[1] == " ":
-                datetime_str = "0" + datetime_str
-                # Convert it to "Hour:Minute:year Day Month Year"
-                datetime_str = "00:00:00 {0} {1}".format(
-                    datetime_str, current_year)
-
-                # Check if the datetime string is in the format "Month Year"
-            else:
-                # Convert it to "Hour:Minute:year Day Month Year"
-                datetime_str = "00:00:00 1 " + datetime_str
-
-            # Convert the datetime string to a datetime.datetime object
-            datetime_obj = datetime.strptime(
-                datetime_str, "%H:%M:%S %d %B %Y")
-
-        return datetime_obj
-
-    def days_between(date):
+    def timeToStr(self, date):
+        """
+        Returns [day], [month], [year]
+        """
+        date = date.split(" ")
+        date[0] = date[0].replace("th","").replace("st","").replace("rd","").replace("nd","")
+        months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "Augu",
+            "September",
+            "October",
+            "November",
+            "December",
+        ]
+        
+        # If first half is day, so like 1 January
+        if date[0].isdigit():
+            return [str(date[0]),str(months.index(date[1])+1), str(datetime.utcnow().year)]
+        # Format like month - year
+        elif len(date) == 2 and date[1].isdigit():
+            return ["1",str(months.index(date[0])+1),str(date[1])]
+        return [str(datetime.utcnow().day),"1",str(datetime.utcnow().year)]
+        
+    def daysBetween(self, date):
         """<date>
 
         Calculate the difference in days between a given date
         and the current UTC date"""
-        d1 = datetime.strptime(str(date, '%Y-%m-%d'))
-        d2 = datetime.strptime(str(datetime.utcnow()), '%Y-%m-%d')
-        return abs((d2 - d1).days)
+        d1 = datetime.strptime(date[1] + " " + date[0] + " " + date[2] + "  1:00AM", '%m %d %Y %I:%M%p')
+        now = datetime.utcnow()
+        d2 = datetime.strptime(str(now.month) + " " + str(now.day) + " " + str(now.year) + "  1:00AM",'%m %d %Y %I:%M%p')
+        return int(abs((d2 - d1).days))
 
-    for i in list(range(0, 10)):
-        params = {
-            'Group': '832',
-            'PageNum': i
-        }
-        groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
-        page = session.get(groupURL, params=params)
-        page.raise_for_status()
-        soup = BeautifulSoup(page.text, 'html5lib')
+    def cleanThreads(self):
+        """Automated function to clean up old threads that haven't received replies"""
+        for i in list(range(10)):
+            params = {
+                'Group': tpt['groupID'],
+                'PageNum': i
+            }
+            groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
+            page = self.session.get(groupURL, params=params)
+            page.raise_for_status()
+            soup = BeautifulSoup(page.text, 'html5lib')
+    
+            # Get all links in ul.TopiList#TopicList
+            # <ul id="TopicList" class="TopicList">
+    
+            threadData = []
+            element = soup.find_all('a', {'class': 'Title'})
+            titles = [i.text for i in element]
+            length = list(range(len(element)))
+            threads = [element[i]["href"].split('&Thread=')[1] for i in length]
+            dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
+            key = self.key
+    
+            for i in length:
+                threadData.append([threads[i], titles[i], dates[i]])
+    
+            for e in list(range(len(threadData))):
+                threadNum = threadData[e][0]
+                title = threadData[e][1]
+                date = timestr_to_obj(threadData[e][2])
+    
+                if not whitelist(threadNum):
+                    if daysBetween(date) >= 182:
+                        # Lock thread if it isn't already
+                        alert = soup.find('div',
+                                          {'class': 'Warning'})
+                        if alert == -1:
+                            threadPost(lockMsg, threadNum, key)
+                            threadModeration('lock', threadNum, key)
+                    elif daysBetween(date) >= 200:
+                        open(threadNum + '-backup.html', 'w+').write(str(soup))
+                        threadModeration('delete', threadNum, key)
 
-        # Get all links in ul.TopiList#TopicList
-        # <ul id="TopicList" class="TopicList">
+    def threadBackup(self, threadNum):
+        """<threadNum>
 
-        threadData = []
-        title = [i.text for i in soup.find_all('a', {'class': 'Title'})]
-        length = list(range(len(title)))
-        threads = [title[i]["href"].split('&Thread=')[1] for i in length]
-        dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
-        # Fetch key from page since the key seems to change sometimes
-        key = soup.find('form', {'class': 'PostFForm'})['action'].split(
-            '&Key=')[1]
+        Make a backup of a specified thread.
+        It will download all the HTML from all pages and save it in the backup folder
+        """
+        for i in range(100):
+            url = "http://powdertoy.co.uk/Groups/Thread/View.html?Group={0}&Thread={1}&PageNum={2}".format(tpt['groupID'], threadNum, i)
+            # Save the html to a folder under "backups" named the threadNum
+            newpath = r'Backups/' + str(threadNum) 
+            if not os.path.exists(newpath):
+                os.makedirs(newpath)
 
-        for i in list(range(len(dates))):
-            threadData.append([threads[i], title[i], dates[i]])
+            params = {
+                'Group': tpt['groupID'],
+                'PageNum': i
+            }
 
-        for e in list(range(len(threadData))):
-            threadNum = threadData[e][0]
-            title = threadData[e][1]
-            date = timestr_to_obj(threadData[e][2])
+            # Get html from page replace links with saved copy
+            groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
+            page = self.session.get(url)
+            page.raise_for_status()
+            if page.text.find('<div id="MessageContainer') == -1:
+                break
+            open("Backups/" + threadNum + "/" + threadNum + '-backup page-'+str(i)+'.html', 'w+').write(page.text)
 
-            if not whitelist(threadNum):
-                if days_between(date) >= 182:
-                    # Lock thread if it isn't already
-                    alert = soup.find('div',
-                                      {'class': 'Warning'})
-                    if alert == -1:
-                        threadPost(lockMsg, threadNum, key)
-                        threadModeration('lock', threadNum, key)
-                elif days_between(date) >= 200:
-                    open(threadNum + '-backup.html', 'w+').write(str(soup))
-                    threadModeration('delete', threadNum, key)
+a = TPT()
+a.cleanThreads()
+a.threadBackup()
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

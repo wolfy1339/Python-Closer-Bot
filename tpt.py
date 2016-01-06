@@ -49,7 +49,7 @@ class TPT(object):
         self.lockMsg = ''.join(tpt['lockmsg'])
         self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
         self.referer += '?Group={0}'.format(tpt['groupID'])
-        self.white = tpt['whitelist']
+        self.white = self.mergeSort(tpt['whitelist'])
         self.session = requests.Session()
 
         data = {
@@ -66,10 +66,7 @@ class TPT(object):
         """<thread number>
 
         Returns if a given thread is in the whitelist"""
-        for a in self.white:
-            if threadNum == a:
-                return True
-        return False
+        return self.binarySearch(self.white,threadNum)
 
     def postRequest(self, url, data, headers=None, params=None, **kwargs):
         """<url> <headers> <POST data> [<URL parameters>]
@@ -218,31 +215,80 @@ class TPT(object):
                             threadModeration('lock', threadNum, key)
 
 
-    def threadBackup(self, threadNum):
-        """<threadNum>
-
-        Make a backup of a specified thread.
-        It will download all the HTML from all pages and save it in the backup folder
+    def saveBackUp(self,threadNum):
+        """<thread num>
+        saves copy of HTML of each page of thread in a different folder for each thread
+        in a backup folder
+        Thanks wolfy1339 for breaking the usefulness of this function :P
+        
         """
-        for i in range(500):
-            url = "http://powdertoy.co.uk/Groups/Thread/View.html?Group={0}&Thread={1}&PageNum={2}".format(tpt['groupID'], threadNum, i)
-            # Save the html to a folder under "backups" named the threadNum
-            newpath = r'Backups/' + str(threadNum) 
+        #Save pages 0 through 1000
+        for i in range(0,100):
+            url = "http://powdertoy.co.uk/Groups/Thread/View.html?Group={0}&Thread={1}&PageNum={2}".format(config.groupId,threadNum,i)
+            #Save the html to a folder under "backups" named the threadNum
+            newpath = r'Backups/'+str(threadNum) 
             if not os.path.exists(newpath):
                 os.makedirs(newpath)
-
+            
             params = {
-                'Group': tpt['groupID'],
+                'Group': config.groupId,
                 'PageNum': i
             }
-
-            # Get html from page replace links with saved copy
+            
+            #Get html from page replace links with saved copu
             groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
             page = self.session.get(url)
             page.raise_for_status()
             if page.text.find('<div id="MessageContainer') == -1:
                 break
             open("Backups/" + threadNum + "/" + threadNum + '-backup page-'+str(i)+'.html', 'w+').write(page.text)
+    
+    def mergeSort(alist): #Ahh the internet where you can steal code for any algorithim
+        if len(alist)>1:
+            mid = len(alist)//2
+            lefthalf = alist[:mid]
+            righthalf = alist[mid:]
+    
+            mergeSort(lefthalf)
+            mergeSort(righthalf)
+    
+            i=0
+            j=0
+            k=0
+            while i < len(lefthalf) and j < len(righthalf):
+                if int(lefthalf[i]) < int(righthalf[j]):
+                    alist[k]=lefthalf[i]
+                    i=i+1
+                else:
+                    alist[k]=righthalf[j]
+                    j=j+1
+                k=k+1
+    
+            while i < len(lefthalf):
+                alist[k]=lefthalf[i]
+                i=i+1
+                k=k+1
+    
+            while j < len(righthalf):
+                alist[k]=righthalf[j]
+                j=j+1
+                k=k+1
+        return alist
+        
+    def binarySearch(sequence, value): #Modified binary search
+        lo, hi = 0, len(sequence) - 1
+        while lo <= hi:
+            mid = (lo + hi) / 2
+    
+            if int(sequence[mid]) < int(value):
+                lo = mid + 1
+            elif int(value) < int(sequence[mid]):
+                hi = mid - 1
+            elif int(value) == int(sequence[mid]):
+                return sequence[mid]
+            else:
+                return True
+        return False
 
 a = TPT()
 a.cleanThreads()

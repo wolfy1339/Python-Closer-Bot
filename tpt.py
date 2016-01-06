@@ -219,14 +219,12 @@ class TPT(object):
         """<thread num>
         saves copy of HTML of each page of thread in a different folder for each thread
         in a backup folder
-        Thanks wolfy1339 for breaking the usefulness of this function :P
-        
         """
         #Save pages 0 through 1000
         for i in range(0,100):
-            url = "http://powdertoy.co.uk/Groups/Thread/View.html?Group={0}&Thread={1}&PageNum={2}".format(config.groupId,threadNum,i)
+            url = "http://powdertoy.co.uk/Groups/Thread/View.html?Group={0}&Thread={1}&PageNum={2}".format(config.groupId, threadNum, i)
             #Save the html to a folder under "backups" named the threadNum
-            newpath = r'Backups/'+str(threadNum) 
+            newpath = r'Backups/' + str(threadNum) 
             if not os.path.exists(newpath):
                 os.makedirs(newpath)
             
@@ -241,7 +239,7 @@ class TPT(object):
             page.raise_for_status()
             if page.text.find('<div id="MessageContainer') == -1:
                 break
-            open("Backups/" + threadNum + "/" + threadNum + '-backup page-'+str(i)+'.html', 'w+').write(page.text)
+            open("Backups/" + threadNum + "/" + threadNum + '-backup page-'+ str(i) +'.html', 'w+').write(page.text)
     
     def mergeSort(alist): #Ahh the internet where you can steal code for any algorithim
         if len(alist)>1:
@@ -255,6 +253,7 @@ class TPT(object):
             i=0
             j=0
             k=0
+
             while i < len(lefthalf) and j < len(righthalf):
                 if int(lefthalf[i]) < int(righthalf[j]):
                     alist[k]=lefthalf[i]

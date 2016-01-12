@@ -38,6 +38,7 @@ from config import tpt
 from datetime import datetime
 import os
 import requests
+import requests.utils
 
 
 class TPT(object):
@@ -52,13 +53,21 @@ class TPT(object):
         self.white = self.mergeSort(tpt['whitelist'])
         self.session = requests.Session()
 
-        data = {
-            'name': tpt['username'],
-            'pass': tpt['password'],
-            'Remember': 'Yes'
-        }
-        response = self.session.request(
-            'POST', 'https://powdertoy.co.uk/Login.html', data=data)
+        if not os.path.isfile('cookies.txt'):
+            data = {
+                'name': tpt['username'],
+                'pass': tpt['password'],
+                'Remember': 'Yes'
+            }
+            response = self.session.request(
+                'POST', 'https://powdertoy.co.uk/Login.html', data=data)
+            with open('cookies.txt', 'w+') as f:
+                f.write(dict(self.session.cookies))
+        else:
+            with open('cookies.txt') as f:
+                cookies = requests.utils.cookiejar_from_dict(f)
+                self.session.cookies.set(cookies.keys(), cookies.values())
+                response = self.session.get('http://powdertoy.co.uk')
         response.raise_for_status()
         self.key = BeautifulSoup(response.text).find('ul', {'class': 'dropdown-menu'}).findAll('li', {'class': 'item'})[4].find('a')['href'].split('&Key=')[0]
 

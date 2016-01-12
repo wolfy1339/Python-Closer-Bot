@@ -34,7 +34,7 @@
 # Please respect point 2 of this notice when contributing.
 
 from bs4 import BeautifulSoup
-from config import tpt
+import config
 from datetime import datetime
 import os
 import requests
@@ -48,16 +48,16 @@ class TPT(object):
     """
     # Variables used in the source
     def __init__(self):
-        self.lockMsg = ''.join(tpt['lockmsg'])
+        self.lockMsg = ''.join(config.tpt.lockmsg)
         self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
-        self.referer += '?Group={0}'.format(tpt['groupID'])
-        self.white = self.mergeSort(tpt['whitelist'])
+        self.referer += '?Group={0}'.format(config.tpt.groupID)
+        self.white = self.mergeSort(config.tpt.whitelist)
         self.session = requests.Session()
 
         if not os.path.isfile('cookies.txt'):
             data = {
-                'name': tpt['username'],
-                'pass': tpt['password'],
+                'name': config.tpt.username,
+                'pass': config.tpt.password,
                 'Remember': 'Yes'
             }
             response = self.session.post(
@@ -109,10 +109,10 @@ class TPT(object):
                 'Moderation_DeleteConfirm': 'Delete Thread'
             }
             ref = moderationURL
-            ref += '?Group={0}&Thread={0}&Key={2}'.format(tpt['groupID'], threadNum, modKey)
+            ref += '?Group={0}&Thread={0}&Key={2}'.format(config.tpt.groupID, threadNum, modKey)
 
         params = {
-            'Group': tpt['groupID'],
+            'Group': config.tpt.groupID,
             'Thread': threadNum,
             'Key': modKey
         }
@@ -140,7 +140,7 @@ class TPT(object):
         }
         threadPostURL = 'http://powdertoy.co.uk/Groups/Thread/Reply.html'
         params = {
-            'Group': tpt['groupID'],
+            'Group': config.tpt.groupID,
             'Key': key
         }
         self.postRequest(threadPostURL, headers=headers, data=data,
@@ -191,7 +191,7 @@ class TPT(object):
         """Automated function to clean up old threads that haven't received replies"""
         for i in list(range(10)):
             params = {
-                'Group': tpt['groupID'],
+                'Group': config.tpt.groupID,
                 'PageNum': i
             }
             groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
@@ -249,7 +249,7 @@ class TPT(object):
                 os.makedirs(newpath)
 
             params = {
-                'Group': config.groupId,
+                'Group': config.tpt.groupId,
                 'PageNum': i
             }
 

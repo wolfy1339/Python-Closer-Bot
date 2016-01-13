@@ -39,6 +39,7 @@ from datetime import datetime
 import os
 import requests
 import requests.utils
+import json
 
 
 class TPT(object):
@@ -59,13 +60,13 @@ class TPT(object):
                 'pass': tpt['password'],
                 'Remember': 'Yes'
             }
-            response = self.session.request(
-                'POST', 'https://powdertoy.co.uk/Login.html', data=data)
+            response = self.session.post(
+                'https://powdertoy.co.uk/Login.html', data=data)
             with open('cookies.txt', 'w+') as f:
-                f.write(dict(self.session.cookies))
+                json.dump(requests.utils.dict_from_cookiejar(self.session.cookies), f)
         else:
             with open('cookies.txt') as f:
-                cookies = requests.utils.cookiejar_from_dict(f)
+                cookies = requests.utils.cookiejar_from_dict(json.loads(f))
                 self.session.cookies.set(cookies.keys(), cookies.values())
                 response = self.session.get('http://powdertoy.co.uk')
         response.raise_for_status()

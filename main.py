@@ -28,7 +28,8 @@
 ###
 
 # Notice:
-#   * This requires requests & BeutifulSoup4 from pypi
+#   * This requires requests & BeutifulSoup4 from pypi,
+#     sometimes it can be installed by default with your Python installation
 #   * This code is fully PEP8 compliant,
 #     and is Python 2 & 3 compatible (should be most of the time)
 # Please respect point 2 of this notice when contributing.
@@ -63,14 +64,18 @@ class TPT(object):
             response = self.session.post(
                 'https://powdertoy.co.uk/Login.html', data=data)
             with open('cookies.txt', 'w+') as f:
-                json.dump(requests.utils.dict_from_cookiejar(self.session.cookies), f)
+                cookies = self.session.cookies
+                json.dump(requests.utils.dict_from_cookiejar(cookies, f))
         else:
             with open('cookies.txt') as f:
                 cookies = requests.utils.cookiejar_from_dict(json.loads(f))
                 self.session.cookies.set(cookies.keys(), cookies.values())
                 response = self.session.get('http://powdertoy.co.uk')
         response.raise_for_status()
-        self.key = BeautifulSoup(response.text).find('ul', {'class': 'dropdown-menu'}).findAll('li', {'class': 'item'})[4].find('a')['href'].split('&Key=')[0]
+        soup = BeautifulSoup(response.text).find('ul',
+                                                 {'class': 'dropdown-menu'})
+        li = soup.findAll('li', {'class': 'item'})[4]
+        self.key = li.find('a')['href'].split('&Key=')[0]
 
     def whitelist(self, threadNum):
         """<thread number>
@@ -109,7 +114,8 @@ class TPT(object):
                 'Moderation_DeleteConfirm': 'Delete Thread'
             }
             ref = moderationURL
-            ref += '?Group={0}&Thread={0}&Key={2}'.format(config.tpt.groupID, threadNum, modKey)
+            ref += '?Group={0}&Thread={0}&Key={2}'.format(config.tpt.groupID,
+                                                          threadNum, modKey)
 
         params = {
             'Group': config.tpt.groupID,
@@ -152,7 +158,8 @@ class TPT(object):
         Returns [day], [month], [year]
         """
         date = date.split(' ')
-        date[0] = date[0].replace('th', '').replace('st', '').replace('rd', '').replace('nd', '')
+        date[0] = date[0].replace('th', '').replace('st', '').replace('rd',
+                                                                      '').replace('nd', '')
         months = [
             'January',
             'February',
@@ -170,7 +177,7 @@ class TPT(object):
 
         # If first half is day, so like 1 January
         if date[0].isdigit():
-            return [str(date[0]), str(months.index(date[1])+1), str(datetime.utcnow().year)]
+            return [str(date[0]), str(months.index(date[1]) + 1), str(datetime.utcnow().year)]
         # Format like month - year
         elif len(date) == 2 and date[1].isdigit():
             return ['1', str(months.index(date[0]) + 1), str(date[1])]

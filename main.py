@@ -54,6 +54,7 @@ class TPT(object):
         self.referer += '?Group={0}'.format(config.tpt.groupID)
         self.white = self.mergeSort(config.tpt.whitelist)
         self.session = requests.Session()
+        self.baseUrl = 'http://powdertoy.co.uk/Groups/'
 
         if not os.path.isfile('cookies.txt'):
             data = {
@@ -69,7 +70,7 @@ class TPT(object):
         else:
             with open('cookies.txt') as f:
                 cookies = requests.utils.cookiejar_from_dict(json.loads(f))
-                self.session.cookies.set(cookies.keys(), cookies.values())
+                self.session.cookies = cookies
                 response = self.session.get('http://powdertoy.co.uk')
         response.raise_for_status()
         soup = BeautifulSoup(response.text).find('ul',
@@ -101,7 +102,7 @@ class TPT(object):
         """
         # Example headers (includes server response headers):
         # http://hastebin.com/isugujeyeg.txt
-        moderationURL = 'http://powdertoy.co.uk/Groups/Thread/Moderation.html'
+        moderationURL = self.baseUrl + 'Thread/Moderation.html'
         if action.lower() == 'lock':
             data = {
                 'Moderation_Lock': 'Lock'
@@ -158,8 +159,7 @@ class TPT(object):
         Returns [day], [month], [year]
         """
         date = date.split(' ')
-        date[0] = date[0].replace('th', '').replace('st', '').replace('rd',
-                                                                      '').replace('nd', '')
+        date[0] = date[0].replace('th', '').replace('st', '').replace('rd', '').replace('nd', '')
         months = [
             'January',
             'February',
@@ -175,13 +175,14 @@ class TPT(object):
             'December',
         ]
 
+        year = datetime.utcnow().year
         # If first half is day, so like 1 January
         if date[0].isdigit():
-            return [str(date[0]), str(months.index(date[1]) + 1), str(datetime.utcnow().year)]
+            return [str(date[0]), str(months.index(date[1]) + 1), str(year)]
         # Format like month - year
         elif len(date) == 2 and date[1].isdigit():
             return ['1', str(months.index(date[0]) + 1), str(date[1])]
-        return [str(datetime.utcnow().day), '1', str(datetime.utcnow().year)]
+        return [str(datetime.utcnow().day), '1', str(year)]
 
     def daysBetween(self, date):
         """<date>
@@ -189,13 +190,19 @@ class TPT(object):
         Calculate the difference in days between a given date
         and the current UTC date
         """
-        d1 = datetime.strptime(date[1] + ' ' + date[0] + ' ' + date[2] + '  1:00AM', '%m %d %Y %I:%M%p')
+        dates = date[1] + ' ' + date[0] + ' ' + date[2] + '  1:00AM'
+        d1 = datetime.strptime(dates, '%m %d %Y %I:%M%p')
         now = datetime.utcnow()
-        d2 = datetime.strptime(str(now.month) + ' ' + str(now.day) + ' ' + str(now.year) + '  1:00AM', '%m %d %Y %I:%M%p')
+        nowDate = str(now.month) + ' ' + str(now.day) + ' ' + str(now.year)
+        d2 = datetime.strptime(nowDate + '  1:00AM', '%m %d %Y %I:%M%p')
         return int(abs((d2 - d1).days))
 
     def cleanThreads(self):
-        """Automated function to clean up old threads that haven't received replies"""
+        """No arguments
+
+        Automated function to clean up threads that haven't received replies in
+        a given time.
+        """
         for i in list(range(10)):
             params = {
                 'Group': config.tpt.groupID,
@@ -237,19 +244,21 @@ class TPT(object):
                     elif daysBetween(date) >= 182:
                         # Lock thread if it isn't already
                         alert = soup.find('div',
-                                          {'class': 'Warning'})
-                        if alert == -1:
+                                          {'class': 'Warning'}) == -1
+                        if alert:
                             threadPost(lockMsg, threadNum, key)
                             threadModeration('lock', threadNum, key)
 
     def saveBackUp(self, threadNum):
         """<thread num>
-        Saves copy of HTML of each page of thread in a different folder for each thread
-        in a backup folder
+
+        Saves a copy of every thread page in seperate folders for each thread
         """
         # Save pages 0 through 1000
         for i in list(range(100)):
-            url = 'http://powdertoy.co.uk/Groups/Thread/View.html?Group={0}&Thread={1}&PageNum={2}'.format(config.groupId, threadNum, i)
+            url = self.baseUrl + 'Thread/View.html'
+            url += '?Group={0}&Thread={1}'.format(config.tpt.groupId, threadNum)
+            url += '&PageNum={1}'.fortmat(i)
             # Save the html to a folder under 'backups' named the threadNum
             newpath = r'Backups/' + str(threadNum)
             if not os.path.exists(newpath):
@@ -266,7 +275,8 @@ class TPT(object):
             page.raise_for_status()
             if page.text.find('<div id="MessageContainer"') == -1:
                 break
-            open('Backups/' + threadNum + '/' + threadNum + '-backup page-' + str(i) + '.html', 'w+').write(page.text)
+            path = 'Backups/' + threadNum + '/' + 'backup-' + str(i) + '.html'
+            open(path, 'w+').write(page.text)
 
     def mergeSort(alist):
         # Ahh the internet where you can steal code for any algorithim

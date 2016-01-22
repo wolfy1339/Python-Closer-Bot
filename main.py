@@ -218,8 +218,11 @@ class TPT(object):
 
             threadData = []
             element = soup.find_all('a', {'class': 'Title'})
-            titles = [i.text for i in element]
+            icons = soup.find('ul', {'class': 'TopicList'}).find_all('img', {'class': 'TopicIcon'})
             length = list(range(len(element)))
+
+            iconSrc = [icons[i]['src'] for i in length]
+            titles = [i.text for i in element]
             threads = [element[i]["href"].split('&Thread=')[1] for i in length]
             dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
             key = self.key
@@ -228,7 +231,8 @@ class TPT(object):
                 data = [
                     threads[i],
                     titles[i],
-                    dates[i]
+                    dates[i],
+                    iconSrc[i]
                 ]
                 threadData.append(data)
 
@@ -236,8 +240,9 @@ class TPT(object):
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = self.timeToStr(threadData[e][2])
+            src = threadData[e][3]
 
-            if not whitelist(threadNum):
+            if not whitelist(threadNum) and src.find('Sticky') == -1:
                 if daysBetween(date) >= 200:
                     self.threadBackup(threadNum)
                     threadModeration('delete', threadNum, key)

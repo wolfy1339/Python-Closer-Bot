@@ -44,7 +44,8 @@ import json
 
 
 class TPT(object):
-    """A simple bot to automatically lock and delete old threads
+    """
+    A simple bot to automatically lock and delete old threads
     that haven't had any replies
     """
     # Variables used in the source
@@ -223,7 +224,7 @@ class TPT(object):
 
             iconSrc = [icons[i]['src'] for i in length]
             titles = [i.text for i in element]
-            threads = [element[i]["href"].split('&Thread=')[1] for i in length]
+            threads = [element[i]['href'].split('&Thread=')[1] for i in length]
             dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
             key = self.key
 

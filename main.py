@@ -232,22 +232,22 @@ class TPT(object):
                 ]
                 threadData.append(data)
 
-            for e in list(range(len(threadData))):
-                threadNum = threadData[e][0]
-                title = threadData[e][1]
-                date = self.timeToStr(threadData[e][2])
+        for e in list(range(len(threadData))):
+            threadNum = threadData[e][0]
+            title = threadData[e][1]
+            date = self.timeToStr(threadData[e][2])
 
-                if not whitelist(threadNum):
-                    if daysBetween(date) >= 200:
-                        self.threadBackup(threadNum)
-                        threadModeration('delete', threadNum, key)
-                    elif daysBetween(date) >= 182:
-                        # Lock thread if it isn't already
-                        alert = soup.find('div',
-                                          {'class': 'Warning'}) == -1
-                        if alert:
-                            threadPost(lockMsg, threadNum, key)
-                            threadModeration('lock', threadNum, key)
+            if not whitelist(threadNum):
+                if daysBetween(date) >= 200:
+                    self.threadBackup(threadNum)
+                    threadModeration('delete', threadNum, key)
+                elif daysBetween(date) >= 182:
+                    # Lock thread if it isn't already
+                    alert = soup.find('div',
+                                      {'class': 'Warning'}) == -1
+                    if alert:
+                        threadPost(lockMsg, threadNum, key)
+                        threadModeration('lock', threadNum, key)
 
     def saveBackUp(self, threadNum):
         """<thread num>

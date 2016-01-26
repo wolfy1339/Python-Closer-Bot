@@ -1,5 +1,5 @@
 ###
-# Copyright (c) 2015, wolfy1339
+# Copyright (c) 2015-2016, wolfy1339 and contributors
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 
 # Notice:
 #   * This requires requests & BeutifulSoup4 from pypi,
-#     sometimes it can be installed by default with your Python installation
+#     sometimes they might be included by default with your Python installation
 #   * This code is fully PEP8 compliant,
 #     and is Python 2 & 3 compatible (should be most of the time)
 # Please respect point 2 of this notice when contributing.
@@ -74,10 +74,12 @@ class TPT(object):
                 self.session.cookies = cookies
                 response = self.session.get('http://powdertoy.co.uk')
         response.raise_for_status()
-        soup = BeautifulSoup(response.text).find('ul',
-                                                 {'class': 'dropdown-menu'})
+        arg = {
+            'class': 'dropdown-menu'
+        }
+        soup = BeautifulSoup(response.text, 'html5lib').find('ul', arg)
         li = soup.findAll('li', {'class': 'item'})[4]
-        self.key = li.find('a')['href'].split('&Key=')[0]
+        self.key = li.find('a')['href'].split('?Key=')[1]
 
     def whitelist(self, threadNum):
         """<thread number>
@@ -219,7 +221,14 @@ class TPT(object):
 
             threadData = []
             element = soup.find_all('a', {'class': 'Title'})
-            icons = soup.find('ul', {'class': 'TopicList'}).find_all('img', {'class': 'TopicIcon'})
+
+            ulClass = {
+                'class': 'TopicList'
+            }
+            imgClass = {
+                'class': 'TopicIcon'
+            }
+            icons = soup.find('ul', ulClass).find_all('img', imgClass)
             length = list(range(len(element)))
 
             iconSrc = [icons[i]['src'] for i in length]
@@ -242,8 +251,18 @@ class TPT(object):
             title = threadData[e][1]
             date = self.timeToStr(threadData[e][2])
             src = threadData[e][3]
+            sticky = src.find('Sticky') != -1
 
-            if not whitelist(threadNum) and src.find('Sticky') == -1:
+            params = {
+                'Group': config.tpt.groupID,
+                'Thread': e
+            }
+            groupURL = 'http://powdertoy.co.uk/Groups/Thread/View.html'
+            page = self.session.get(groupURL, params=params)
+            page.raise_for_status()
+            soup = BeautifulSoup(page.text, 'html5lib')
+
+            if not whitelist(threadNum) and not sticky:
                 if daysBetween(date) >= 200:
                     self.threadBackup(threadNum)
                     threadModeration('delete', threadNum, key)
@@ -262,8 +281,9 @@ class TPT(object):
         """
         # Save pages 0 through 1000
         for i in list(range(100)):
+            groupId = config.tpt.groupId
             url = self.baseUrl + 'Thread/View.html'
-            url += '?Group={0}&Thread={1}'.format(config.tpt.groupId, threadNum)
+            url += '?Group={0}&Thread={1}'.format(groupId, threadNum)
             url += '&PageNum={1}'.fortmat(i)
             # Save the html to a folder under 'backups' named the threadNum
             newpath = r'Backups/' + str(threadNum)
@@ -282,7 +302,8 @@ class TPT(object):
             if page.text.find('<div id="MessageContainer"') == -1:
                 break
             path = 'Backups/' + threadNum + '/' + 'backup-' + str(i) + '.html'
-            open(path, 'w+').write(page.text)
+            with open(path, 'w+') as w:
+                w.write(page.text)
 
     def mergeSort(alist):
         # Ahh the internet where you can steal code for any algorithim

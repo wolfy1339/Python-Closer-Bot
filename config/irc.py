@@ -14,5 +14,5 @@ botPassword = ''
 NickServ = True
 ownerHostmasks = ['wolfy1339!~wolfy1339@botters/wolfy1339']
 adminHostmasks = []
-commandChar = '@'
+commandChar = '@' #TOTALLY STOLE MEH COMMAND CHAR
 encoding = 'utf-8'

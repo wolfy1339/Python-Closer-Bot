@@ -118,7 +118,7 @@ class TPT:
                 'Moderation_DeleteConfirm': 'Delete Thread'
             }
             ref = moderationURL
-            ref += '?Group={0}&Thread={0}&Key={2}'.format(config.tpt.groupID,
+            ref += '?Group={0}&Thread={1}&Key={2}'.format(config.tpt.groupID,
                                                           threadNum, modKey)
 
         params = {
@@ -305,7 +305,8 @@ class TPT:
             with open(path, 'w+') as w:
                 w.write(page.text)
 
-    def mergeSort(alist):
+    def mergeSort(self, alist):
+        """Sort's a list to be used with self.binarySearch"""
         # Ahh the internet where you can steal code for any algorithim
         if len(alist) > 1:
             mid = len(alist)//2
@@ -339,8 +340,8 @@ class TPT:
                 k = k + 1
         return alist
 
-    def binarySearch(sequence, value):
-        # Modified binary search
+    def binarySearch(self, sequence, value):
+        """Modified binary search"""
         lo, hi = 0, len(sequence) - 1
         while lo <= hi:
             mid = (lo + hi) / 2

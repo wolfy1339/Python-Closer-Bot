@@ -43,7 +43,7 @@ import requests.utils
 import json
 
 
-class TPT(object):
+class TPT:
     """
     A simple bot to automatically lock and delete old threads
     that haven't had any replies
@@ -156,13 +156,13 @@ class TPT(object):
         self.postRequest(threadPostURL, headers=headers, data=data,
                          params=params)
 
-    def timeToStr(self, date):
+    def timeToStr(self, string):
         """<date>
 
         Returns [day], [month], [year]
         """
-        date = date.split(' ')
-        date[0] = date[0].replace('th', '').replace('st', '').replace('rd', '').replace('nd', '')
+        data = string.split(' ')
+        date = data[0].replace('th', '').replace('st', '').replace('rd', '').replace('nd', '')
         months = [
             'January',
             'February',
@@ -180,11 +180,11 @@ class TPT(object):
 
         year = datetime.utcnow().year
         # If first half is day, so like 1 January
-        if date[0].isdigit():
-            return [str(date[0]), str(months.index(date[1]) + 1), str(year)]
+        if date.isdigit():
+            return [str(date]), str(months.index(data[1]) + 1), str(year)]
         # Format like month - year
-        elif len(date) == 2 and date[1].isdigit():
-            return ['1', str(months.index(date[0]) + 1), str(date[1])]
+        elif len(date) == 2 and data[1].isdigit():
+            return ['1', str(months.index(date) + 1), str(data[1])]
         return [str(datetime.utcnow().day), '1', str(year)]
 
     def daysBetween(self, date):
@@ -355,7 +355,6 @@ class TPT(object):
                 return True
         return False
 
-a = TPT()
-a.cleanThreads()
+TPT.cleanThreads()
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

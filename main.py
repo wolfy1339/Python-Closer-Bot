@@ -177,11 +177,15 @@ class TPT:
             'November',
             'December',
         ]
-
+        #In h:min:second format
+        if string.find(":") == 2:
+            now = datetime.utcnow()
+            return [str(now.day),str(now.month),str(now.year)]
+            
         year = datetime.utcnow().year
         # If first half is day, so like 1 January
         if date.isdigit():
-            return [str(date]), str(months.index(data[1]) + 1), str(year)]
+            return [str(date), str(months.index(data[1]) + 1), str(year)]
         # Format like month - year
         elif len(date) == 2 and data[1].isdigit():
             return ['1', str(months.index(date) + 1), str(data[1])]

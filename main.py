@@ -177,10 +177,10 @@ class TPT:
             'November',
             'December',
         ]
-        #In h:min:second format
+        now = datetime.utcnow()
+        # In h:min:second format
         if string.find(":") == 2:
-            now = datetime.utcnow()
-            return [str(now.day),str(now.month),str(now.year)]
+            return [str(now.day), str(now.month), str(now.year)]
             
         year = datetime.utcnow().year
         # If first half is day, so like 1 January
@@ -189,7 +189,7 @@ class TPT:
         # Format like month - year
         elif len(date) == 2 and data[1].isdigit():
             return ['1', str(months.index(date) + 1), str(data[1])]
-        return [str(datetime.utcnow().day), '1', str(year)]
+        return [str(now.day), '1', str(year)]
 
     def daysBetween(self, date):
         """<date>

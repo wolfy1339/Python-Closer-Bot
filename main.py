@@ -238,7 +238,7 @@ class TPT:
                 iconSrc = [icons[i]['src'] for i in length]
                 titles = [i.text for i in element]
                 threads = [element[i]['href'].split('&Thread=')[1] for i in length]
-                dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
+                dates = [self.timeToStr(i.text) for i in soup.find_all('span', {'class': 'Date'})]
                 key = self.key
     
                 for i in length:
@@ -258,7 +258,7 @@ class TPT:
         for e in list(range(len(threadData))):
             threadNum = threadData[e][0]
             title = threadData[e][1]
-            date = self.timeToStr(threadData[e][2])
+            date = threadData[e][2]
             src = threadData[e][3]
             sticky = src.find('Sticky') != -1
 

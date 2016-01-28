@@ -206,17 +206,17 @@ class TPT:
         Automated function to clean up threads that haven't received replies in
         a given time.
         """
-        for i in list(range(10)):
-            params = {
-                'Group': config.tpt.groupID,
-                'PageNum': i
-            }
-            groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
-            page = self.session.get(groupURL, params=params)
-            page.raise_for_status()
-            soup = BeautifulSoup(page.text, 'html5lib')
+        if not os.path.isfile('thread.json'):
+            for i in list(range(10)):
+                params = {
+                    'Group': config.tpt.groupID,
+                    'PageNum': str(i)
+                }
+                groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
+                page = self.session.get(groupURL, params=params)
+                page.raise_for_status()
+                soup = BeautifulSoup(page.text, 'html5lib')
 
-            if not os.path.isfile('thread.json'):
                 # Get all links in ul.TopiList#TopicList
                 # <ul id="TopicList" class="TopicList">
                 threadData = []
@@ -245,9 +245,11 @@ class TPT:
                         iconSrc[i]
                     ]
                     threadData.append(data)
-            else:
-                with open('thread.json') as t:
-                    threadData = json.loads(t)
+            with open('thread.json', 'w+') as t:
+                json.dump(threadData, t)
+        else:
+            with open('thread.json') as t:
+                threadData = json.loads(t)
 
         for e in list(range(len(threadData))):
             threadNum = threadData[e][0]

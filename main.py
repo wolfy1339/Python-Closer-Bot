@@ -216,35 +216,38 @@ class TPT:
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
 
-            # Get all links in ul.TopiList#TopicList
-            # <ul id="TopicList" class="TopicList">
-
-            threadData = []
-            element = soup.find_all('a', {'class': 'Title'})
-
-            ulClass = {
-                'class': 'TopicList'
-            }
-            imgClass = {
-                'class': 'TopicIcon'
-            }
-            icons = soup.find('ul', ulClass).find_all('img', imgClass)
-            length = list(range(len(element)))
-
-            iconSrc = [icons[i]['src'] for i in length]
-            titles = [i.text for i in element]
-            threads = [element[i]['href'].split('&Thread=')[1] for i in length]
-            dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
-            key = self.key
-
-            for i in length:
-                data = [
-                    threads[i],
-                    titles[i],
-                    dates[i],
-                    iconSrc[i]
-                ]
-                threadData.append(data)
+            if not os.path.isfile('thread.json'):
+                # Get all links in ul.TopiList#TopicList
+                # <ul id="TopicList" class="TopicList">
+                threadData = []
+                element = soup.find_all('a', {'class': 'Title'})
+    
+                ulClass = {
+                    'class': 'TopicList'
+                }
+                imgClass = {
+                    'class': 'TopicIcon'
+                }
+                icons = soup.find('ul', ulClass).find_all('img', imgClass)
+                length = list(range(len(element)))
+    
+                iconSrc = [icons[i]['src'] for i in length]
+                titles = [i.text for i in element]
+                threads = [element[i]['href'].split('&Thread=')[1] for i in length]
+                dates = [i.text for i in soup.find_all('span', {'class': 'Date'})]
+                key = self.key
+    
+                for i in length:
+                    data = [
+                        threads[i],
+                        titles[i],
+                        dates[i],
+                        iconSrc[i]
+                    ]
+                    threadData.append(data)
+            else:
+                with open('thread.json') as t:
+                    threadData = json.loads(t)
 
         for e in list(range(len(threadData))):
             threadNum = threadData[e][0]
@@ -261,16 +264,16 @@ class TPT:
             page = self.session.get(groupURL, params=params)
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
+            alert = soup.find('div',
+                                      {'class': 'Warning'}) != -1
 
             if not whitelist(threadNum) and not sticky:
-                if daysBetween(date) >= 200:
+                if daysBetween(date) >= 200 and alert:
                     self.threadBackup(threadNum)
                     threadModeration('delete', threadNum, key)
                 elif daysBetween(date) >= 182:
                     # Lock thread if it isn't already
-                    alert = soup.find('div',
-                                      {'class': 'Warning'}) == -1
-                    if alert:
+                    if not alert:
                         threadPost(lockMsg, threadNum, key)
                         threadModeration('lock', threadNum, key)
 

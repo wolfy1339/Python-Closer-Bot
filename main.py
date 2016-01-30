@@ -101,7 +101,7 @@ class TPT:
     def threadModeration(self, action, threadNum, modKey):
         """<action> <thread number> <moderation key>
 
-        Function to send the correct POST request to lock or delete a thread
+        Function to send the correct POST request to either lock or delete a thread
         """
         # Example headers (includes server response headers):
         # http://hastebin.com/isugujeyeg.txt
@@ -148,7 +148,7 @@ class TPT:
             'Post_Post': 'Post',
             'Post_Message': message
         }
-        threadPostURL = 'http://powdertoy.co.uk/Groups/Thread/Reply.html'
+        threadPostURL = self.baseURL + 'Thread/Reply.html'
         params = {
             'Group': config.tpt.groupID,
             'Key': key
@@ -156,10 +156,10 @@ class TPT:
         self.postRequest(threadPostURL, headers=headers, data=data,
                          params=params)
 
-    def timeToStr(self, string):
+    def timeToArray(self, string):
         """<date>
 
-        Returns [day], [month], [year]
+        Returns [day], [month], [year] array
         """
         data = string.split(' ')
         date = data[0].replace('th', '').replace('st', '').replace('rd', '').replace('nd', '')
@@ -204,6 +204,48 @@ class TPT:
         d2 = datetime.strptime(nowDate + '  1:00AM', '%m %d %Y %I:%M%p')
         return int(abs((d2 - d1).days))
 
+    def getThreadData(self):
+        for i in list(range(10)):
+            params = {
+                'Group': config.tpt.groupID,
+                'PageNum': str(i)
+            }
+            groupURL = self.baseURL + 'Page/View.html'
+            page = self.session.get(groupURL, params=params)
+            page.raise_for_status()
+            soup = BeautifulSoup(page.text, 'html5lib')
+            threadData = []
+        
+            # Get all links in ul.TopiList#TopicList
+            # <ul id="TopicList" class="TopicList">
+            element = soup.find_all('a', {'class': 'Title'})
+        
+            ulClass = {
+                'class': 'TopicList'
+            }
+            imgClass = {
+                'class': 'TopicIcon'
+            }
+            icons = soup.find('ul', ulClass).find_all('img', imgClass)
+            length = list(range(len(element)))
+        
+            iconSrc = [icons[i]['src'] for i in length]
+            titles = [i.text for i in element]
+            threads = [element[i]['href'].split('&Thread=')[1] for i in length]
+            dates = [self.timeToArray(i.text) for i in soup.find_all('span', {'class': 'Date'})]
+            key = self.key
+        
+            for i in length:
+                data = [
+                    threads[i],
+                    titles[i],
+                    dates[i],
+                    iconSrc[i]
+                ]
+                threadData.append(data)
+        with open('thread.json', 'w+') as t:
+            json.dump(threadData, t)
+        return threadData
     def cleanThreads(self):
         """No arguments
 
@@ -211,46 +253,7 @@ class TPT:
         a given time.
         """
         if not os.path.isfile('thread.json'):
-            for i in list(range(10)):
-                params = {
-                    'Group': config.tpt.groupID,
-                    'PageNum': str(i)
-                }
-                groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
-                page = self.session.get(groupURL, params=params)
-                page.raise_for_status()
-                soup = BeautifulSoup(page.text, 'html5lib')
-
-                # Get all links in ul.TopiList#TopicList
-                # <ul id="TopicList" class="TopicList">
-                threadData = []
-                element = soup.find_all('a', {'class': 'Title'})
-    
-                ulClass = {
-                    'class': 'TopicList'
-                }
-                imgClass = {
-                    'class': 'TopicIcon'
-                }
-                icons = soup.find('ul', ulClass).find_all('img', imgClass)
-                length = list(range(len(element)))
-    
-                iconSrc = [icons[i]['src'] for i in length]
-                titles = [i.text for i in element]
-                threads = [element[i]['href'].split('&Thread=')[1] for i in length]
-                dates = [self.timeToStr(i.text) for i in soup.find_all('span', {'class': 'Date'})]
-                key = self.key
-    
-                for i in length:
-                    data = [
-                        threads[i],
-                        titles[i],
-                        dates[i],
-                        iconSrc[i]
-                    ]
-                    threadData.append(data)
-            with open('thread.json', 'w+') as t:
-                json.dump(threadData, t)
+            threadData = self.getThreadData()
         else:
             with open('thread.json') as t:
                 threadData = json.loads(t)
@@ -266,7 +269,7 @@ class TPT:
                 'Group': config.tpt.groupID,
                 'Thread': e
             }
-            groupURL = 'http://powdertoy.co.uk/Groups/Thread/View.html'
+            groupURL = self.baseURL + 'Thread/View.html'
             page = self.session.get(groupURL, params=params)
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
@@ -305,7 +308,7 @@ class TPT:
             }
 
             # Get html from page replace links with saved copy
-            groupURL = 'http://powdertoy.co.uk/Groups/Page/View.html'
+            groupURL = self.baseURL + 'Page/View.html'
             page = self.session.get(url)
             page.raise_for_status()
             if page.text.find('<div id="MessageContainer"') == -1:

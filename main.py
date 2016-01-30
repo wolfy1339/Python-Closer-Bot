@@ -101,7 +101,8 @@ class TPT:
     def threadModeration(self, action, threadNum, modKey):
         """<action> <thread number> <moderation key>
 
-        Function to send the correct POST request to either lock or delete a thread
+        Function to send the correct POST request in order to
+        either lock or delete a thread
         """
         # Example headers (includes server response headers):
         # http://hastebin.com/isugujeyeg.txt
@@ -181,7 +182,7 @@ class TPT:
         # In h:min:second format
         if string.find(":") == 2:
             return [str(now.day), str(now.month), str(now.year)]
-            
+
         year = datetime.utcnow().year
         # If first half is day, so like 1 January
         if date.isdigit():
@@ -215,11 +216,11 @@ class TPT:
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
             threadData = []
-        
+
             # Get all links in ul.TopiList#TopicList
             # <ul id="TopicList" class="TopicList">
             element = soup.find_all('a', {'class': 'Title'})
-        
+
             ulClass = {
                 'class': 'TopicList'
             }
@@ -228,13 +229,13 @@ class TPT:
             }
             icons = soup.find('ul', ulClass).find_all('img', imgClass)
             length = list(range(len(element)))
-        
+
             iconSrc = [icons[i]['src'] for i in length]
             titles = [i.text for i in element]
             threads = [element[i]['href'].split('&Thread=')[1] for i in length]
             dates = [self.timeToArray(i.text) for i in soup.find_all('span', {'class': 'Date'})]
             key = self.key
-        
+
             for i in length:
                 data = [
                     threads[i],
@@ -246,6 +247,7 @@ class TPT:
         with open('thread.json', 'w+') as t:
             json.dump(threadData, t)
         return threadData
+
     def cleanThreads(self):
         """No arguments
 
@@ -274,7 +276,7 @@ class TPT:
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
             alert = soup.find('div',
-                                      {'class': 'Warning'}) != -1
+                              {'class': 'Warning'}) != -1
 
             if not whitelist(threadNum) and not sticky:
                 if daysBetween(date) >= 200 and alert:

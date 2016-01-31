@@ -206,6 +206,10 @@ class TPT:
         return int(abs((d2 - d1).days))
 
     def getThreadData(self):
+        """No arguments
+
+        Gathers data about the threads in the Group
+        """
         for i in list(range(10)):
             params = {
                 'Group': config.tpt.groupID,
@@ -320,7 +324,10 @@ class TPT:
                 w.write(page.text)
 
     def mergeSort(self, alist):
-        """Sort's a list to be used with self.binarySearch"""
+        """<list>
+
+        Sort's a list to be used with self.binarySearch
+        """
         # Ahh the internet where you can steal code for any algorithim
         if len(alist) > 1:
             mid = len(alist)//2
@@ -355,7 +362,10 @@ class TPT:
         return alist
 
     def binarySearch(self, sequence, value):
-        """Modified binary search"""
+        """<sequence> <value>
+
+        Modified binary search
+        """
         lo, hi = 0, len(sequence) - 1
         while lo <= hi:
             mid = (lo + hi) / 2

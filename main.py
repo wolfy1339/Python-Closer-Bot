@@ -67,7 +67,7 @@ class TPT:
                 'https://powdertoy.co.uk/Login.html', data=data)
             with open('cookies.txt', 'w+') as f:
                 cookies = self.session.cookies
-                json.dump(requests.utils.dict_from_cookiejar(cookies, f))
+                json.dump(requests.utils.dict_from_cookiejar(cookies), f)
         else:
             with open('cookies.txt') as f:
                 cookies = requests.utils.cookiejar_from_dict(json.loads(f))

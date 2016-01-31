@@ -67,7 +67,8 @@ class TPT:
                 'https://powdertoy.co.uk/Login.html', data=data)
             with open('cookies.txt', 'w+') as f:
                 cookies = self.session.cookies
-                json.dump(requests.utils.dict_from_cookiejar(cookies), f)
+                cookieDict = requests.utils.dict_from_cookiejar(cookies)
+                json.dump(cookieDict, f, indent=2, separators=(',', ': '))
         else:
             with open('cookies.txt') as f:
                 cookies = requests.utils.cookiejar_from_dict(json.loads(f))
@@ -249,7 +250,7 @@ class TPT:
                 ]
                 threadData.append(data)
         with open('thread.json', 'w+') as t:
-            json.dump(threadData, t)
+            json.dump(threadData, t, indent=2, separators=(',', ': '))
         return threadData
 
     def cleanThreads(self):

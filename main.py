@@ -252,11 +252,11 @@ class TPT:
             json.dump(threadData, t, indent=2, separators=(',', ': '))
         return threadData
 
-    def cleanThreads(self):
+    def loadDataFile(self):
         """No arguments
 
-        Automated function to clean up threads that haven't received replies in
-        a given time.
+        Loads the JSON data file and does the correct data transformations
+        if needed
         """
         if not os.path.isfile('thread.json'):
             threadData = self.getThreadData()
@@ -264,20 +264,28 @@ class TPT:
             with open('thread.json') as t:
                 threadData = json.loads(t)
 
-        if type(threadData) is 'list':
-            print('WARNING: Invalid data type!')
-            tData = threadData
-            threadData = {}
-            for i in length:
-                data = [
-                    tData[i][1],
-                    tData[i][2],
-                    tData[i][3]
-                ]
-                threadData[tData[i][0]] = data
-            with open('thread.json', 'w+') as t:
-                json.dump(threadData, t, indent=2, separators=(',', ': '))
+            if type(threadData) is 'list':
+                print('WARNING: Invalid data type!')
+                tData = threadData
+                threadData = {}
+                for i in length:
+                    data = [
+                        tData[i][1],
+                        tData[i][2],
+                        tData[i][3]
+                    ]
+                    threadData[tData[i][0]] = data
+                with open('thread.json', 'w+') as t:
+                    json.dump(threadData, t, indent=2, separators=(',', ': '))
+        return threadData
 
+    def cleanThreads(self):
+        """No arguments
+
+        Automated function to clean up threads that haven't received replies in
+        a given time.
+        """
+        threadData = self.loadDataFile()
         for e in list(threadData.keys()):
             threadNum = threadData[e][0]
             title = threadData[e][1]

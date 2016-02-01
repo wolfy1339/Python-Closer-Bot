@@ -220,7 +220,7 @@ class TPT:
             page = self.session.get(groupURL, params=params)
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
-            threadData = []
+            threadData = {}
 
             # Get all links in ul.TopiList#TopicList
             # <ul id="TopicList" class="TopicList">
@@ -243,12 +243,11 @@ class TPT:
 
             for i in length:
                 data = [
-                    threads[i],
                     titles[i],
                     dates[i],
                     iconSrc[i]
                 ]
-                threadData.append(data)
+                threadData[threads[i]] = data
         with open('thread.json', 'w+') as t:
             json.dump(threadData, t, indent=2, separators=(',', ': '))
         return threadData
@@ -265,7 +264,21 @@ class TPT:
             with open('thread.json') as t:
                 threadData = json.loads(t)
 
-        for e in list(range(len(threadData))):
+        if type(threadData) is 'list':
+            print('WARNING: Invalid data type!')
+            tData = threadData
+            threadData = {}
+            for i in length:
+                data = [
+                    tData[i][1],
+                    tData[i][2],
+                    tData[i][3]
+                ]
+                threadData[tData[i][0]] = data
+            with open('thread.json', 'w+') as t:
+                json.dump(threadData, t, indent=2, separators=(',', ': '))
+
+        for e in list(threadData.keys()):
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = threadData[e][2]
@@ -274,7 +287,7 @@ class TPT:
 
             params = {
                 'Group': config.tpt.groupID,
-                'Thread': e
+                'Thread': threadNum
             }
             groupURL = self.baseURL + 'Thread/View.html'
             page = self.session.get(groupURL, params=params)

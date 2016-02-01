@@ -299,12 +299,12 @@ class TPT:
             if not whitelist(threadNum) and not sticky:
                 if daysBetween(date) >= 200 and alert:
                     self.threadBackup(threadNum)
-                    threadModeration('delete', threadNum, key)
+                    self.threadModeration('delete', threadNum, key)
                 elif daysBetween(date) >= 182:
                     # Lock thread if it isn't already
                     if not alert:
-                        threadPost(lockMsg, threadNum, key)
-                        threadModeration('lock', threadNum, key)
+                        self.threadPost(lockMsg, threadNum, key)
+                        self.threadModeration('lock', threadNum, key)
 
     def saveBackUp(self, threadNum):
         """<thread num>

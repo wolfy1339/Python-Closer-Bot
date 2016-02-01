@@ -262,7 +262,7 @@ class TPT:
                         self.threadPost(lockMsg, threadNum, key)
                         self.threadModeration('lock', threadNum, key)
 
-    def saveBackUp(self, threadNum):
+    def threadBackup(self, threadNum):
         """<thread num>
 
         Saves a copy of every thread page in seperate folders for each thread

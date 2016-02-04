@@ -1,7 +1,7 @@
 import sys
 
 
-def confirm(self, question, answer="yes"):
+def confirm(self, question, answer=None):
     """Ask a yes/no question via raw_input() and return their answer.
 
     "question" is a string that is presented to the user.
@@ -12,20 +12,20 @@ def confirm(self, question, answer="yes"):
     The "answer" return value is True for "yes" or False for "no".
     """
     valid = {
-        "yes": True,
-        "y": True,
-        "ye": True,
-        "no": False,
-        "n": False
+        'yes': True,
+        'y': True,
+        'ye': True,
+        'no': False,
+        'n': False
     }
     if answer is None:
-        prompt = " [y/n] "
-    elif answer == "yes":
+        prompt = ' [y/n] '
+    elif answer == 'yes':
         prompt = " [Y/n] "
-    elif answer == "no":
-        prompt = " [y/N] "
+    elif answer == 'no':
+        prompt = ' [y/N] '
     else:
-        raise ValueError("Invalid default answer: '{0}'".format(answer))
+        raise ValueError('Invalid default answer: "{0}"'.format(answer))
 
     while True:
         sys.stdout.write(question + prompt)
@@ -35,5 +35,5 @@ def confirm(self, question, answer="yes"):
         elif choice in valid:
             return valid[choice]
         else:
-            sys.stdout.write("Please respond with 'yes' or 'no' "
-                             "(or 'y' or 'n').\n")
+            sys.stdout.write('Please respond with \'yes\' or \'no\' '
+                             '(or \'y\' or \'n\').\n')

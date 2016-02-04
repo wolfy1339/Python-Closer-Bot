@@ -36,6 +36,7 @@
 
 from bs4 import BeautifulSoup
 import config
+from confirm import confirm
 from functions import *
 import os
 import requests
@@ -227,7 +228,7 @@ class TPT:
                     json.dump(threadData, t, indent=2, separators=(',', ': '))
         return threadData
 
-    def cleanThreads(self):
+    def cleanThreads(self, delete=True, confirm=False):
         """No arguments
 
         Automated function to clean up threads that haven't received replies in
@@ -253,9 +254,18 @@ class TPT:
                               {'class': 'Warning'}) != -1
 
             if not whitelist(threadNum) and not sticky:
-                if daysBetween(date) >= 200 and alert:
+                if daysBetween(date) >= 200 and alert and delete:
+                    msg = 'Would you like to delete thread {0} {1}?'.format(threadNum, title)
                     self.threadBackup(threadNum)
-                    self.threadModeration('delete', threadNum, key)
+                    if confirm:
+                        if confirm(msg):
+                            self.threadModeration('delete', threadNum, key)
+                            print('Deleted thread {0} {1}'.format(threadNum, title))
+                        else:
+                            pass
+                    else:
+                        self.threadModeration('delete', threadNum, key)
+                        print('Deleted thread {0} {1}'.format(threadNum, title))
                 elif daysBetween(date) >= 182:
                     # Lock thread if it isn't already
                     if not alert:

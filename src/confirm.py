@@ -14,7 +14,6 @@ def confirm(self, question, answer=None):
     valid = {
         'yes': True,
         'y': True,
-        'ye': True,
         'no': False,
         'n': False
     }

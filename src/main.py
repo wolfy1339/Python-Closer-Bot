@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import config
 from confirm import confirm
 from functions import *
+from __future__ import print_function
 import os
 import requests
 import requests.utils

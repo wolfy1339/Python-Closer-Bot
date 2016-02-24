@@ -29,9 +29,11 @@ class TPT:
         self.white = functions.whitelist().mergeSort(config.tpt.whitelist)
         self.session = requests.Session()
         self.baseUrl = 'http://powdertoy.co.uk/Groups/'
-        self.timeToArray = functions.dates().timeToArray
-        self.daysBetween = functions.dates().daysBetween
-        self.whitelist = functions.whitelist().whitelist
+        dates = functions.dates()
+        whitelistClass = functions.whitelist()
+        self.timeToArray = dates.timeToArray
+        self.daysBetween = dates.daysBetween
+        self.whitelist = whitelistClass.whitelist
 
         if not os.path.isfile('cookies.txt'):
             data = {
@@ -275,7 +277,5 @@ class TPT:
             with open(path, 'w+') as w:
                 w.write(page.text)
 
-
-TPT().cleanThreads()
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

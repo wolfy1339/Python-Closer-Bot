@@ -1,4 +1,5 @@
 from datetime import datetime
+from . import config
 
 class dates:
     """Contains several date functions"""
@@ -43,8 +44,8 @@ class dates:
         Calculate the difference in days between a given date
         and the current UTC date
         """
-        dates = date[1] + ' ' + date[0] + ' ' + date[2] + '  1:00AM'
-        d1 = datetime.strptime(dates, '%m %d %Y %I:%M%p')
+        dateFormatted = date[1] + ' ' + date[0] + ' ' + date[2] + '  1:00AM'
+        d1 = datetime.strptime(dateFormatted, '%m %d %Y %I:%M%p')
         now = datetime.utcnow()
         nowDate = str(now.month) + ' ' + str(now.day) + ' ' + str(now.year)
         d2 = datetime.strptime(nowDate + '  1:00AM', '%m %d %Y %I:%M%p')
@@ -52,6 +53,9 @@ class dates:
 
 class whitelist:
     """Contains functions related to the whitelist"""
+    def __init__(self):
+        self.white = self.mergeSort(config.tpt.whitelist)
+
     def mergeSort(self, alist):
         """<list>
 

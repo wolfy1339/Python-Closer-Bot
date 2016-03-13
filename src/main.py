@@ -1,14 +1,14 @@
 from __future__ import print_function
 
 from bs4 import BeautifulSoup
-from . import config
-from confirm import confirm
-from functions import *
-
 import json
 import os
 import requests
 import requests.utils
+
+from . import config
+from confirm import confirm
+import functions
 
 # Notice:
 #   * This requires requests & BeutifulSoup4 from pypi,
@@ -34,7 +34,7 @@ class TPT:
         whitelistClass = functions.whitelist()
         self.timeToArray = dates.timeToArray
         self.daysBetween = dates.daysBetween
-        self.whitelist = whitelistClass.whitelist
+        self.whitelist = whitelistClass.isWhitelisted
 
         if not os.path.isfile('cookies.txt'):
             data = {
@@ -162,12 +162,12 @@ class TPT:
             iconSrc = [icons[i]['src'] for i in length]
             titles = [i.text for i in element]
             threads = [element[i]['href'].split('&Thread=')[1] for i in length]
-            dates = [self.timeToArray(i.text) for i in soup.find_all('span', {'class': 'Date'})]
+            dateArray = [self.timeToArray(i.text) for i in soup.find_all('span', {'class': 'Date'})]
 
             for i in length:
                 data = [
                     titles[i],
-                    dates[i],
+                    dateArray[i],
                     iconSrc[i]
                 ]
                 threadData[threads[i]] = data
@@ -257,7 +257,7 @@ class TPT:
             groupId = config.tpt.groupId
             url = self.baseUrl + 'Thread/View.html'
             url += '?Group={0}&Thread={1}'.format(groupId, threadNum)
-            url += '&PageNum={1}'.fortmat(i)
+            url += '&PageNum={1}'.format(i)
             # Save the html to a folder under 'backups' named the threadNum
             newpath = r'Backups/' + str(threadNum)
             if not os.path.exists(newpath):

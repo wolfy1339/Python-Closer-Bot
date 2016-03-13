@@ -113,7 +113,7 @@ class whitelist:
                 return True
         return False
 
-    def whitelist(self, threadNum):
+    def isWhitelisted(self, threadNum):
         """<thread number>
 
         Returns if a given thread is in the whitelist

@@ -1,3 +1,7 @@
+"""
+Main file containing all the logic needed
+in order to run the automated thread closer bot
+"""
 from __future__ import print_function
 
 from bs4 import BeautifulSoup

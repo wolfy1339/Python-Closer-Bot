@@ -6,9 +6,9 @@
 # Please respect point 2 of this notice when contributing.
 
 from bs4 import BeautifulSoup
-import config
-from confirm import confirm
-from functions import *
+import .config
+from .confirm import confirm
+from .functions import *
 from __future__ import print_function
 import os
 import requests

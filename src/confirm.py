@@ -1,7 +1,7 @@
 import sys
 
 
-def confirm(self, question, answer=None):
+def confirm(question, answer=None):
     """Ask a yes/no question via raw_input() and return their answer.
 
     "question" is a string that is presented to the user.

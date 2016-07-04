@@ -1,5 +1,51 @@
+"""
+Various helper functions
+"""
+from bs4 import BeautifulSoup
+import json
+import os
+import requests.utils
 from datetime import datetime
 from . import config
+
+def dumpCookies(cookies):
+    """Used to dump cookies from a session to a JSON file"""
+    with open('cookies.txt', 'w+') as f:
+        cookieDict = requests.utils.dict_from_cookiejar(cookies)
+        json.dump(cookieDict, f, indent=2, separators=(',', ': '))
+
+
+def getCookies(session):
+    """Used to login into The Powder Toy's website"""
+    data = {
+        'name': config.tpt.username,
+        'pass': config.tpt.password,
+        'Remember': 'Yes'
+    }
+    session.post(
+        'https://powdertoy.co.uk/Login.html', data=data)
+    dumpCookies(session.cookies)
+    return session.cookies
+
+def loadCookies(session):
+    """Used to return cookies loaded from a JSON file"""
+    if os.path.isfile('cookies.txt'):
+        with open('cookies.txt') as f:
+            cookies = requests.utils.cookiejar_from_dict(json.loads(f))
+            return cookies
+    else:
+        getCookies(session)
+
+
+def getKey(session):
+    """Used to get the user key in order to post, and do moderation tasks"""
+    response = session.get('http://powdertoy.co.uk')
+    arg = {
+        'class': 'dropdown-menu'
+    }
+    soup = BeautifulSoup(response.text, 'html5lib').find('ul', arg)
+    li = soup.findAll('li', {'class': 'item'})[4]
+    return li.find('a')['href'].split('?Key=')[1]
 
 class dates(object):
     """Contains several date functions"""
@@ -8,8 +54,8 @@ class dates(object):
 
         Returns [day], [month], [year] array
         """
-        data = string.split(' ')
-        date = data[0].replace('th', '').replace('st', '').replace('rd', '').replace('nd', '')
+        data = string.split(' ')[0].replace('th', '').replace('st', '')
+        date = data.replace('rd', '').replace('nd', '')
         months = [
             'January',
             'February',

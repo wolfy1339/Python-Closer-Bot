@@ -1,3 +1,6 @@
+"""
+Config file for connecting to IRC
+"""
 server = 'chat.freenode.net'
 port = '6667'
 channels = ','.join([
@@ -14,5 +17,5 @@ botPassword = ''
 NickServ = True
 ownerHostmasks = ['wolfy1339!~wolfy1339@botters/wolfy1339']
 adminHostmasks = []
-commandChar = '@' #TOTALLY STOLE MEH COMMAND CHAR
+commandChar = '@'
 encoding = 'utf-8'

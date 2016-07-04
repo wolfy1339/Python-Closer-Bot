@@ -1,3 +1,4 @@
+"""Module to ask a yes/no question via raw_input() and return the answer"""
 import sys
 
 
@@ -27,7 +28,7 @@ def confirm(question, answer=None):
         raise ValueError('Invalid default answer: "{0}"'.format(answer))
 
     while True:
-        sys.stdout.write(question + prompt)
+        sys.stdout.write(question + '\n')
         if sys.version_info[0] < 3:
             choice = raw_input(prompt).lower()
         else:

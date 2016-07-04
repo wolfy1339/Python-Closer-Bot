@@ -33,37 +33,14 @@ class TPT(object):
         self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
         self.referer += '?Group={0}'.format(config.tpt.groupID)
         self.session = requests.Session()
+        self.session.cookies = functions.loadCookies(self.session)
         self.baseUrl = 'http://powdertoy.co.uk/Groups/'
         dates = functions.dates()
         whitelistClass = functions.whitelist()
         self.timeToArray = dates.timeToArray
         self.daysBetween = dates.daysBetween
         self.whitelist = whitelistClass.isWhitelisted
-
-        if not os.path.isfile('cookies.txt'):
-            data = {
-                'name': config.tpt.username,
-                'pass': config.tpt.password,
-                'Remember': 'Yes'
-            }
-            response = self.session.post(
-                'https://powdertoy.co.uk/Login.html', data=data)
-            with open('cookies.txt', 'w+') as f:
-                cookies = self.session.cookies
-                cookieDict = requests.utils.dict_from_cookiejar(cookies)
-                json.dump(cookieDict, f, indent=2, separators=(',', ': '))
-        else:
-            with open('cookies.txt') as f:
-                cookies = requests.utils.cookiejar_from_dict(json.loads(f))
-                self.session.cookies = cookies
-                response = self.session.get('http://powdertoy.co.uk')
-        response.raise_for_status()
-        arg = {
-            'class': 'dropdown-menu'
-        }
-        soup = BeautifulSoup(response.text, 'html5lib').find('ul', arg)
-        li = soup.findAll('li', {'class': 'item'})[4]
-        self.key = li.find('a')['href'].split('?Key=')[1]
+        self.key = functions.getKey(self.session)
 
     def postRequest(self, url, data, headers=None, params=None, **kwargs):
         """<url> <headers> <POST data> [<URL parameters>]
@@ -144,8 +121,8 @@ class TPT(object):
                 'Group': config.tpt.groupID,
                 'PageNum': str(i)
             }
-            groupURL = self.baseURL + 'Page/View.html'
-            page = self.session.get(groupURL, params=params)
+            page = self.session.get(self.baseURL + 'Page/View.html',
+                                    params=params)
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
             threadData = {}
@@ -154,19 +131,14 @@ class TPT(object):
             # <ul id="TopicList" class="TopicList">
             element = soup.find_all('a', {'class': 'Title'})
 
-            ulClass = {
-                'class': 'TopicList'
-            }
-            imgClass = {
-                'class': 'TopicIcon'
-            }
-            icons = soup.find('ul', ulClass).find_all('img', imgClass)
+            icons = soup.find_all('img', {'class': 'TopicIcon'})
             length = list(range(len(element)))
 
             iconSrc = [icons[i]['src'] for i in length]
             titles = [i.text for i in element]
             threads = [element[i]['href'].split('&Thread=')[1] for i in length]
-            dateArray = [self.timeToArray(i.text) for i in soup.find_all('span', {'class': 'Date'})]
+            dates = soup.find_all('span', {'class': 'Date'})
+            dateArray = [self.timeToArray(i.text) for i in dates]
 
             for i in length:
                 data = [
@@ -189,13 +161,12 @@ class TPT(object):
             threadData = self.getThreadData()
         else:
             with open('thread.json') as t:
-                threadData = json.loads(t)
+                tData = json.loads(t)
 
             if type(threadData) is 'list':
                 print('WARNING: Invalid data type!')
-                tData = threadData
                 threadData = {}
-                for i in length:
+                for i in list(range(len(tData))):
                     data = [
                         tData[i][1],
                         tData[i][2],
@@ -212,7 +183,6 @@ class TPT(object):
         Automated function to clean up threads that haven't received replies in
         a given time.
         """
-        key = self.key
         threadData = self.loadDataFile()
         for e in list(threadData.keys()):
             threadNum = threadData[e][0]
@@ -231,25 +201,28 @@ class TPT(object):
             soup = BeautifulSoup(page.text, 'html5lib')
             alert = soup.find('div',
                               {'class': 'Warning'}) != -1
-
+            msg = 'Would you like to delete thread {0} {1}?'.format(threadNum,
+                                                                    title)
             if not self.whitelist(threadNum) and not sticky:
                 if self.daysBetween(date) >= 200 and alert and delete:
-                    msg = 'Would you like to delete thread {0} {1}?'.format(threadNum, title)
                     self.threadBackup(threadNum)
                     if confirm:
                         if confirmed(msg):
-                            self.threadModeration('delete', threadNum, key)
-                            print('Deleted thread {0} {1}'.format(threadNum, title))
+                            self.threadModeration('delete',
+                                                  threadNum, self.key)
+                            print('Deleted thread {0} {1}'.format(threadNum,
+                                                                  title))
                         else:
                             pass
                     else:
-                        self.threadModeration('delete', threadNum, key)
-                        print('Deleted thread {0} {1}'.format(threadNum, title))
+                        self.threadModeration('delete', threadNum, self.key)
+                        print('Deleted thread {0} {1}'.format(threadNum,
+                                                              title))
                 elif self.daysBetween(date) >= 182:
                     # Lock thread if it isn't already
                     if not alert:
-                        self.threadPost(self.lockMsg, threadNum, key)
-                        self.threadModeration('lock', threadNum, key)
+                        self.threadPost(self.lockMsg, threadNum, self.key)
+                        self.threadModeration('lock', threadNum, self.key)
 
     def threadBackup(self, threadNum):
         """<thread num>
@@ -258,10 +231,7 @@ class TPT(object):
         """
         # Save pages 0 through 1000
         for i in list(range(100)):
-            groupId = config.tpt.groupId
             url = self.baseUrl + 'Thread/View.html'
-            url += '?Group={0}&Thread={1}'.format(groupId, threadNum)
-            url += '&PageNum={1}'.format(i)
             # Save the html to a folder under 'backups' named the threadNum
             newpath = r'Backups/' + str(threadNum)
             if not os.path.exists(newpath):
@@ -269,16 +239,16 @@ class TPT(object):
 
             params = {
                 'Group': config.tpt.groupId,
+                'Thread': threadNum,
                 'PageNum': i
             }
 
             # Get html from page replace links with saved copy
-            groupURL = self.baseURL + 'Page/View.html'
-            page = self.session.get(url)
+            page = self.session.get(url, params=params)
             page.raise_for_status()
             if page.text.find('<div id="MessageContainer"') == -1:
                 break
-            path = 'Backups/' + threadNum + '/' + 'backup-' + str(i) + '.html'
+            path = 'Backups/' + threadNum + '/' + 'page-' + str(i) + '.html'
             with open(path, 'w+') as w:
                 w.write(page.text)
 

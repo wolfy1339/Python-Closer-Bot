@@ -1,11 +1,19 @@
+from main import TPT
+
 import os
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(sys.modules[__name__].__file__), ".."))
-from main import TPT
+path = os.path.dirname(sys.modules[__name__].__file__)
+sys.path.insert(0, os.path.join(path, ".."))
+
 x = TPT()
+
+
 def main(arg):
     """Wrapper function to pass arguments to the cleanThreads function"""
-    x.cleanThreads(confirm=not "--automatic" in arg, delete=not "--lock" in arg)
+    confirm = "--automatic" not in arg
+    delete = "--lock" not in arg
+    x.cleanThreads(confirm=confirm, delete=delete)
+
 if __name__ == '__main__':
-    # Execute 'main' with all the command line arguments (excluding sys.argv[0], the program name).
+    # Execute 'main' with all the command line arguments.
     main(sys.argv[1:])

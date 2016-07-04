@@ -1,7 +1,7 @@
 from datetime import datetime
 from . import config
 
-class dates:
+class dates(object):
     """Contains several date functions"""
     def timeToArray(self, string):
         """<date>
@@ -38,7 +38,7 @@ class dates:
             return ['1', str(months.index(date) + 1), str(data[1])]
         return [str(now.day), '1', str(year)]
 
-    def daysBetween(self, date):
+    def daysBetween(date):
         """<date>
 
         Calculate the difference in days between a given date
@@ -51,7 +51,7 @@ class dates:
         d2 = datetime.strptime(nowDate + '  1:00AM', '%m %d %Y %I:%M%p')
         return int(abs((d2 - d1).days))
 
-class whitelist:
+class whitelist(object):
     """Contains functions related to the whitelist"""
     def __init__(self):
         self.white = self.mergeSort(config.tpt.whitelist)
@@ -67,8 +67,8 @@ class whitelist:
             lefthalf = alist[:mid]
             righthalf = alist[mid:]
 
-            mergeSort(lefthalf)
-            mergeSort(righthalf)
+            self.mergeSort(lefthalf)
+            self.mergeSort(righthalf)
 
             i = 0
             j = 0
@@ -94,7 +94,7 @@ class whitelist:
                 k = k + 1
         return alist
 
-    def binarySearch(self, sequence, value):
+    def binarySearch(sequence, value):
         """<sequence> <value>
 
         Modified binary search

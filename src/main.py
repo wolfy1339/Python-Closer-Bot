@@ -11,7 +11,7 @@ import requests
 import requests.utils
 
 from . import config
-from confirm import confirm
+from confirm import confirm as confirmed
 import functions
 
 # Notice:
@@ -22,7 +22,7 @@ import functions
 # Please respect point 2 of this notice when contributing.
 
 
-class TPT:
+class TPT(object):
     """
     A simple bot to automatically lock and delete old threads
     that haven't had any replies
@@ -233,11 +233,11 @@ class TPT:
                               {'class': 'Warning'}) != -1
 
             if not self.whitelist(threadNum) and not sticky:
-                if daysBetween(date) >= 200 and alert and delete:
+                if self.daysBetween(date) >= 200 and alert and delete:
                     msg = 'Would you like to delete thread {0} {1}?'.format(threadNum, title)
                     self.threadBackup(threadNum)
                     if confirm:
-                        if confirm(msg):
+                        if confirmed(msg):
                             self.threadModeration('delete', threadNum, key)
                             print('Deleted thread {0} {1}'.format(threadNum, title))
                         else:
@@ -245,10 +245,10 @@ class TPT:
                     else:
                         self.threadModeration('delete', threadNum, key)
                         print('Deleted thread {0} {1}'.format(threadNum, title))
-                elif daysBetween(date) >= 182:
+                elif self.daysBetween(date) >= 182:
                     # Lock thread if it isn't already
                     if not alert:
-                        self.threadPost(lockMsg, threadNum, key)
+                        self.threadPost(self.lockMsg, threadNum, key)
                         self.threadModeration('lock', threadNum, key)
 
     def threadBackup(self, threadNum):

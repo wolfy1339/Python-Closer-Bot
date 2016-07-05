@@ -103,7 +103,7 @@ class TPT(object):
             'Post_Post': 'Post',
             'Post_Message': message
         }
-        threadPostURL = self.baseURL + 'Thread/Reply.html'
+        threadPostURL = self.baseUrl + 'Thread/Reply.html'
         params = {
             'Group': config.tpt.groupID,
             'Key': key
@@ -121,7 +121,7 @@ class TPT(object):
                 'Group': config.tpt.groupID,
                 'PageNum': str(i)
             }
-            page = self.session.get(self.baseURL + 'Page/View.html',
+            page = self.session.get(self.baseUrl + 'Page/View.html',
                                     params=params)
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
@@ -195,7 +195,7 @@ class TPT(object):
                 'Group': config.tpt.groupID,
                 'Thread': threadNum
             }
-            groupURL = self.baseURL + 'Thread/View.html'
+            groupURL = self.baseUrl + 'Thread/View.html'
             page = self.session.get(groupURL, params=params)
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')

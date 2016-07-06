@@ -141,12 +141,11 @@ class TPT(object):
             dateArray = [self.timeToArray(i.text) for i in dates]
 
             for i in length:
-                data = [
+                threadData[threads[i]] = [
                     titles[i],
                     dateArray[i],
                     iconSrc[i]
                 ]
-                threadData[threads[i]] = data
         with open('thread.json', 'w+') as t:
             json.dump(threadData, t, indent=2, separators=(',', ': '))
         return threadData
@@ -183,8 +182,7 @@ class TPT(object):
         Automated function to clean up threads that haven't received replies in
         a given time.
         """
-        threadData = self.loadDataFile()
-        for e in list(threadData.keys()):
+        for e in list(self.loadDataFile().keys()):
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = threadData[e][2]

@@ -144,7 +144,7 @@ class TPT(object):
                 threadData[threads[i]] = [
                     titles[i],
                     dateArray[i],
-                    iconSrc[i]
+                    iconSrc[i].find('Sticky') != -1
                 ]
         with open('thread.json', 'w+') as t:
             json.dump(threadData, t, indent=2, separators=(',', ': '))
@@ -169,7 +169,7 @@ class TPT(object):
                     data = [
                         tData[i][1],
                         tData[i][2],
-                        tData[i][3]
+                        tData[i][3].find('Sticky') != -1
                     ]
                     threadData[tData[i][0]] = data
                 with open('thread.json', 'w+') as t:
@@ -187,8 +187,10 @@ class TPT(object):
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = threadData[e][2]
-            src = threadData[e][3]
-            sticky = src.find('Sticky') != -1
+            if type(threadData[e][3]) is bool:  # Check wether the value is True or False (boolean)
+                sticky = threadData[e][3]
+            else:  # If it isn't convert it to a boolean
+                sticky = threadData[e][3].find('Sticky') != -1
 
             params = {
                 'Group': config.tpt.groupID,

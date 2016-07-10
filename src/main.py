@@ -187,7 +187,8 @@ class TPT(object):
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = threadData[e][2]
-            if type(threadData[e][3]) is bool:  # Check wether the value is True or False (boolean)
+            if type(threadData[e][3]) is bool:
+                # Check wether the value is True or False (boolean)
                 sticky = threadData[e][3]
             else:  # If it isn't convert it to a boolean
                 sticky = threadData[e][3].find('Sticky') != -1

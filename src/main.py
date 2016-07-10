@@ -182,7 +182,8 @@ class TPT(object):
         Automated function to clean up threads that haven't received replies in
         a given time.
         """
-        for e in list(self.loadDataFile().keys()):
+        threadData = self.loadDataFile()
+        for e in list(threadData.keys()):
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = threadData[e][2]

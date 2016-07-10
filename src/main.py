@@ -35,11 +35,9 @@ class TPT(object):
         self.session = requests.Session()
         self.session.cookies = functions.loadCookies(self.session)
         self.baseUrl = 'http://powdertoy.co.uk/Groups/'
-        dates = functions.dates()
-        whitelistClass = functions.whitelist()
-        self.timeToArray = dates.timeToArray
-        self.daysBetween = dates.daysBetween
-        self.whitelist = whitelistClass.isWhitelisted
+        self.timeToArray = functions.dates().timeToArray
+        self.daysBetween = functions.dates().daysBetween
+        self.whitelist = functions.whitelist().isWhitelisted
         self.key = functions.getKey(self.session)
 
     def postRequest(self, url, data, headers=None, params=None, **kwargs):

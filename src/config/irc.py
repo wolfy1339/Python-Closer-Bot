@@ -4,8 +4,8 @@ Config file for connecting to IRC
 server = 'chat.freenode.net'
 port = '6667'
 channels = [
-    '#botters-test',
-    '##powder-bots',
+    #'#botters-test',
+    #'##powder-bots',
     '##wolfy1339'
 ]
 errorchannel = '##wolfy1339'

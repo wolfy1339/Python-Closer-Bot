@@ -3,11 +3,11 @@ Config file for connecting to IRC
 """
 server = 'chat.freenode.net'
 port = '6667'
-channels = ','.join([
+channels = [
     '#botters-test',
     '##powder-bots',
     '##wolfy1339'
-])
+]
 errorchannel = '##wolfy1339'
 botNick = 'WolfyPyBot'
 botIdent = 'python'

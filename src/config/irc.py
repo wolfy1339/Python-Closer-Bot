@@ -2,7 +2,7 @@
 Config file for connecting to IRC
 """
 server = 'chat.freenode.net'
-port = 6667
+port = 6697
 channels = [
     #'#botters-test',
     #'##powder-bots',

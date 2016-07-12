@@ -10,7 +10,7 @@ import os
 import requests
 import requests.utils
 
-from . import config
+import config
 from confirm import confirm as confirmed
 import functions
 
@@ -158,7 +158,7 @@ class TPT(object):
             threadData = self.getThreadData()
         else:
             with open('thread.json') as t:
-                tData = json.loads(t)
+                tData = json.load(t)
 
             if type(threadData) is 'list':
                 print('WARNING: Invalid data type!')

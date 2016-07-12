@@ -6,7 +6,7 @@ import json
 import os
 import requests.utils
 from datetime import datetime
-from . import config
+import config
 
 def dumpCookies(cookies):
     """Used to dump cookies from a session to a JSON file"""
@@ -29,9 +29,9 @@ def getCookies(session):
 
 def loadCookies(session):
     """Used to return cookies loaded from a JSON file"""
-    if os.path.isfile('cookies.txt'):
-        with open('cookies.txt') as f:
-            cookies = requests.utils.cookiejar_from_dict(json.loads(f))
+    if os.path.isfile('cookies.json'):
+        with open('cookies.json') as f:
+            cookies = requests.utils.cookiejar_from_dict(json.load(f))
             return cookies
     else:
         getCookies(session)

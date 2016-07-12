@@ -4,3 +4,5 @@ pep8:
 python-targets:
   - 2
   - 3
+ignore-paths:
+  - src/config/__init__.py

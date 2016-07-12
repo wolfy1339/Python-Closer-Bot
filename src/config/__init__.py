@@ -1,2 +1,2 @@
-import irc
-import tpt
+from . import irc
+from . import tpt

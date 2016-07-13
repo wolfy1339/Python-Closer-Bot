@@ -8,6 +8,8 @@ channels = [
     #'##powder-bots',
     '##wolfy1339'
 ]
+ipv6 = True
+debug = False
 errorchannel = '##wolfy1339'
 botNick = 'WolfyPyBot'
 botIdent = 'python'

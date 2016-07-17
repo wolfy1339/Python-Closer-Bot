@@ -10,15 +10,15 @@ class Bot(zirc.Client):
             self.connection = zirc.Socket(wrapper=ssl.wrap_socket, family=socket.AF_INET6)
         else:
             self.connection = zirc.Socket(wrapper=ssl.wrap_socket)
-        self.connect(address=config.irc.server,
-                     port=config.irc.port,
-                     nickname=config.irc.botNick,
-                     ident=config.irc.botIdent,
-                     realname=config.irc.botRealname,
-                     channels=config.irc.channels,
-                     sasl_user=config.irc.botAccount,
-                     sasl_pass=config.irc.botPassword)
-
+        self.config = zirc.IRCConfig(address=config.irc.server,
+                                     port=config.irc.port,
+                                     nickname=config.irc.botNick,
+                                     ident=config.irc.botIdent,
+                                     realname=config.irc.botRealname,
+                                     channels=config.irc.channels,
+                                     sasl_user=config.irc.botAccount,
+                                     sasl_pass=config.irc.botPassword)
+        self.connect(self.config)
         self.start()
 
     def on_all(irc, raw):

@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 import json
 import os
 import requests
-import requests.utils
 
 import config
 from confirm import confirm as confirmed

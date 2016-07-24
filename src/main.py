@@ -194,7 +194,7 @@ class TPT(object):
             msg = 'Would you like to delete thread {0} {1}?'.format(threadNum,
                                                                     title)
             if not self.whitelist(threadNum) and not sticky:
-                if self.daysBetween(date) >= 200 and alert and delete:
+                if self.daysBetween(date) >= config.tpt.daysUntilDelete and alert and delete:
                     self.threadBackup(threadNum)
                     if confirm:
                         if confirmed(msg):
@@ -208,7 +208,7 @@ class TPT(object):
                         self.threadModeration('delete', threadNum, self.key)
                         print('Deleted thread {0} {1}'.format(threadNum,
                                                               title))
-                elif self.daysBetween(date) >= 182:
+                elif self.daysBetween(date) >= config.tpt.daysUntilLock:
                     # Lock thread if it isn't already
                     if not alert:
                         self.threadPost(self.lockMsg, threadNum, self.key)

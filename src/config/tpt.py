@@ -3,6 +3,7 @@ Config file for The Powder Toy's website <http://powdertoy.co.uk>
 Contains the message we post before we lock a thread, group ID, whitelist, etc.
 """
 daysUntilLock = 182
+daysUntilDelete = 200
 lockmsg = [
     '<p>Hey there!</p>',
     '<p>We\'re automatically closing this thread since the original poster ',

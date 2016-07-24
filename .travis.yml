@@ -8,4 +8,4 @@ python:
 script:
   - if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pip install pylint requests beautifulsoup4; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pip3 install pylint requests beautifulsoup4; fi
-  - pylint src/__main__.py src/main.py src/functions.py src/confirm.py --include-naming-hint=y
+  - pylint src/__main__.py src/main.py src/functions.py src/confirm.py

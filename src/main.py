@@ -27,10 +27,10 @@ class TPT(object):
     that haven't had any replies
     """
     # Variables used in the source
-    def __init__(self):
-        self.lockMsg = ''.join(config.tpt.lockmsg)
+    def __init__(self, lockmsg=config.tpt.lockmsg, id=config.tpt.groupID, daysUntilLock=config.tpt.daysUntilLock, daysUntilDelete=config.tpt.daysUntilDelete):
+        self.lockMsg = ''.join(lockmsg)
         self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
-        self.referer += '?Group={0}'.format(config.tpt.groupID)
+        self.referer += '?Group={0}'.format(id)
         self.session = requests.Session()
         self.session.cookies = functions.loadCookies(self.session)
         self.baseUrl = 'http://powdertoy.co.uk/Groups/'
@@ -38,6 +38,9 @@ class TPT(object):
         self.daysBetween = functions.dates().daysBetween
         self.whitelist = functions.whitelist().isWhitelisted
         self.key = functions.getKey(self.session)
+        self.groupID = id
+        self.daysUntilLock = daysUntilLock
+        self.daysUntilDelete = daysUntilDelete
 
     def postRequest(self, url, data, headers=None, params=None, **kwargs):
         """<url> <headers> <POST data> [<URL parameters>]
@@ -70,11 +73,11 @@ class TPT(object):
                 'Moderation_DeleteConfirm': 'Delete Thread'
             }
             ref = moderationURL
-            ref += '?Group={0}&Thread={1}&Key={2}'.format(config.tpt.groupID,
+            ref += '?Group={0}&Thread={1}&Key={2}'.format(self.groupID,
                                                           threadNum, modKey)
 
         params = {
-            'Group': config.tpt.groupID,
+            'Group': self.groupID,
             'Thread': threadNum,
             'Key': modKey
         }
@@ -102,7 +105,7 @@ class TPT(object):
         }
         threadPostURL = self.baseUrl + 'Thread/Reply.html'
         params = {
-            'Group': config.tpt.groupID,
+            'Group': self.groupID,
             'Key': key
         }
         self.postRequest(threadPostURL, headers=headers, data=data,
@@ -115,7 +118,7 @@ class TPT(object):
         """
         for i in list(range(10)):
             params = {
-                'Group': config.tpt.groupID,
+                'Group': self.groupID,
                 'PageNum': str(i)
             }
             page = self.session.get(self.baseUrl + 'Page/View.html',
@@ -163,7 +166,7 @@ class TPT(object):
                 raise TypeError('WARNING: Invalid data type!')
         return threadData
 
-    def cleanThreads(self, delete=True, confirm=False):
+    def cleanThreads(self, delete=True, doConfirm=False):
         """No arguments
 
         Automated function to clean up threads that haven't received replies in
@@ -181,7 +184,7 @@ class TPT(object):
                 sticky = threadData[e][3].find('Sticky') != -1
 
             params = {
-                'Group': config.tpt.groupID,
+                'Group': self.groupID,
                 'Thread': threadNum
             }
             groupURL = self.baseUrl + 'Thread/View.html'
@@ -193,10 +196,10 @@ class TPT(object):
             msg = 'Would you like to delete thread {0} {1}?'.format(threadNum,
                                                                     title)
             if not self.whitelist(threadNum) and not sticky:
-                if self.daysBetween(date) >= config.tpt.daysUntilDelete and alert and delete:
+                if self.daysBetween(date) >= self.daysUntilDelete and alert and delete:
                     self.threadBackup(threadNum)
-                    if confirm:
                         if confirmed(msg):
+                    if doConfirm:
                             self.threadModeration('delete',
                                                   threadNum, self.key)
                             print('Deleted thread {0} {1}'.format(threadNum,
@@ -207,7 +210,7 @@ class TPT(object):
                         self.threadModeration('delete', threadNum, self.key)
                         print('Deleted thread {0} {1}'.format(threadNum,
                                                               title))
-                elif self.daysBetween(date) >= config.tpt.daysUntilLock:
+                elif self.daysBetween(date) >= self.daysUntilLock:
                     # Lock thread if it isn't already
                     if not alert:
                         self.threadPost(self.lockMsg, threadNum, self.key)
@@ -227,7 +230,7 @@ class TPT(object):
                 os.makedirs(newpath)
 
             params = {
-                'Group': config.tpt.groupId,
+                'Group': self.groupID,
                 'Thread': threadNum,
                 'PageNum': i
             }

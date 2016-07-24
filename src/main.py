@@ -158,20 +158,10 @@ class TPT(object):
             threadData = self.getThreadData()
         else:
             with open('thread.json') as t:
-                tData = json.load(t)
+                threadData = json.load(t)
 
-            if type(threadData) is 'list':
-                print('WARNING: Invalid data type!')
-                threadData = {}
-                for i in list(range(len(tData))):
-                    data = [
-                        tData[i][1],
-                        tData[i][2],
-                        tData[i][3].find('Sticky') != -1
-                    ]
-                    threadData[tData[i][0]] = data
-                with open('thread.json', 'w+') as t:
-                    json.dump(threadData, t, indent=2, separators=(',', ': '))
+            if isinstance(threadData, list):
+                raise TypeError('WARNING: Invalid data type!')
         return threadData
 
     def cleanThreads(self, delete=True, confirm=False):
@@ -185,7 +175,7 @@ class TPT(object):
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = threadData[e][2]
-            if type(threadData[e][3]) is bool:
+            if isinstance(threadData[e][3], bool):
                 # Check wether the value is True or False (boolean)
                 sticky = threadData[e][3]
             else:  # If it isn't convert it to a boolean

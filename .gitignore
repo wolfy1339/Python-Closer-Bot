@@ -2,4 +2,8 @@
 *~
 cookies.json
 thread.json
+*.sln
+*.pyproj
+.vs/*
+*.db
 

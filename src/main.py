@@ -9,9 +9,9 @@ import json
 import os
 import requests
 
-import config
-from confirm import confirm as confirmed
-import functions
+from . import config
+from .confirm import confirm
+from . import functions
 
 # Notice:
 #   * This requires requests & BeutifulSoup4 from pypi,
@@ -198,8 +198,8 @@ class TPT(object):
             if not self.whitelist(threadNum) and not sticky:
                 if self.daysBetween(date) >= self.daysUntilDelete and alert and delete:
                     self.threadBackup(threadNum)
-                        if confirmed(msg):
                     if doConfirm:
+                        if confirm(msg):
                             self.threadModeration('delete',
                                                   threadNum, self.key)
                             print('Deleted thread {0} {1}'.format(threadNum,

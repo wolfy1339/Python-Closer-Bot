@@ -1,12 +1,13 @@
 """
 Various helper functions
 """
-from bs4 import BeautifulSoup
 import json
 import os
-import requests.utils
+from bs4 import BeautifulSoup
 from datetime import datetime
-import config
+import requests.utils
+
+from . import config
 
 def dumpCookies(cookies):
     """Used to dump cookies from a session to a JSON file"""

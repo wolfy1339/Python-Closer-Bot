@@ -4,7 +4,6 @@ import sys
 
 def confirm(question, answer=None):
     """Ask a yes/no question via raw_input() and return their answer.
-
     "question" is a string that is presented to the user.
     "answer" is the presumed answer if the user just hits <Enter>.
         It must be "yes" (the default), "no" or None (meaning
@@ -21,7 +20,7 @@ def confirm(question, answer=None):
     if answer is None:
         prompt = ' [y/n] '
     elif answer == 'yes':
-        prompt = " [Y/n] "
+        prompt = ' [Y/n] '
     elif answer == 'no':
         prompt = ' [y/N] '
     else:
@@ -29,10 +28,10 @@ def confirm(question, answer=None):
 
     while True:
         sys.stdout.write(question + '\n')
-        if sys.version_info[0] < 3:
-            choice = raw_input(prompt).lower()
-        else:
+        if sys.version_info[0] > 2:
             choice = input(prompt).lower()
+        else:
+            choice = raw_input(prompt).lower()
         if answer is not None and choice == '':
             return valid[answer]
         elif choice in valid:

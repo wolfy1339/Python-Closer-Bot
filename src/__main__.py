@@ -10,9 +10,9 @@ x = TPT()
 
 def main(arg):
     """Wrapper function to pass arguments to the cleanThreads function"""
-    confirm = "--automatic" not in arg
+    doConfirm = "--automatic" not in arg
     delete = "--lock" not in arg
-    x.cleanThreads(confirm=confirm, delete=delete)
+    x.cleanThreads(doConfirm=doConfirm, delete=delete)
 
 if __name__ == '__main__':
     # Execute 'main' with all the command line arguments.

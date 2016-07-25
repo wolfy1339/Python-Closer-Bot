@@ -29,9 +29,9 @@ def confirm(question, answer=None):
     while True:
         sys.stdout.write(question + '\n')
         if sys.version_info[0] > 2:
-            choice = input(prompt).lower()
-        else:
             choice = raw_input(prompt).lower()
+        else:
+            choice = input(prompt).lower()
         if answer is not None and choice == '':
             return valid[answer]
         elif choice in valid:

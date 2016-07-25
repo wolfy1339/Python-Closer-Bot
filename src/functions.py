@@ -85,7 +85,7 @@ class dates(object):
             return ['1', str(months.index(date) + 1), str(data[1])]
         return [str(now.day), '1', str(year)]
 
-    def daysBetween(date):
+    def daysBetween(self, date):
         """<date>
 
         Calculate the difference in days between a given date
@@ -141,7 +141,7 @@ class whitelist(object):
                 k = k + 1
         return alist
 
-    def binarySearch(sequence, value):
+    def binarySearch(self, sequence, value):
         """<sequence> <value>
 
         Modified binary search

@@ -27,7 +27,9 @@ class TPT(object):
     that haven't had any replies
     """
     # Variables used in the source
-    def __init__(self, lockmsg=config.tpt.lockmsg, groupId=config.tpt.groupID, daysUntilLock=config.tpt.daysUntilLock, daysUntilDelete=config.tpt.daysUntilDelete):
+    def __init__(self, lockmsg=config.tpt.lockmsg, groupId=config.tpt.groupID,
+                 daysUntilLock=config.tpt.daysUntilLock,
+                 daysUntilDelete=config.tpt.daysUntilDelete):
         self.lockMsg = ''.join(lockmsg)
         self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
         self.referer += '?Group={0}'.format(groupId)
@@ -191,12 +193,13 @@ class TPT(object):
             page = self.session.get(groupURL, params=params)
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
-            alert = soup.find('div',
-                              {'class': 'Warning'}) != -1
+            alerted = soup.find('div',
+                                {'class': 'Warning'}) != -1
             msg = 'Would you like to delete thread {0} {1}?'.format(threadNum,
                                                                     title)
             if not self.whitelist(threadNum) and not sticky:
-                if self.daysBetween(date) >= self.daysUntilDelete and alert and delete:
+                if (self.daysBetween(date) >= self.daysUntilDelete and
+                        alerted and delete):
                     self.threadBackup(threadNum)
                     if doConfirm:
                         if confirm(msg):

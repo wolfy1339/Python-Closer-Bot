@@ -27,10 +27,10 @@ class TPT(object):
     that haven't had any replies
     """
     # Variables used in the source
-    def __init__(self, lockmsg=config.tpt.lockmsg, id=config.tpt.groupID, daysUntilLock=config.tpt.daysUntilLock, daysUntilDelete=config.tpt.daysUntilDelete):
+    def __init__(self, lockmsg=config.tpt.lockmsg, groupId=config.tpt.groupID, daysUntilLock=config.tpt.daysUntilLock, daysUntilDelete=config.tpt.daysUntilDelete):
         self.lockMsg = ''.join(lockmsg)
         self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
-        self.referer += '?Group={0}'.format(id)
+        self.referer += '?Group={0}'.format(groupId)
         self.session = requests.Session()
         self.session.cookies = functions.loadCookies(self.session)
         self.baseUrl = 'http://powdertoy.co.uk/Groups/'
@@ -38,7 +38,7 @@ class TPT(object):
         self.daysBetween = functions.dates().daysBetween
         self.whitelist = functions.whitelist().isWhitelisted
         self.key = functions.getKey(self.session)
-        self.groupID = id
+        self.groupID = groupId
         self.daysUntilLock = daysUntilLock
         self.daysUntilDelete = daysUntilDelete
 

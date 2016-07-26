@@ -2,8 +2,10 @@
 *~
 cookies.json
 thread.json
+# Visual Studio Files
 *.sln
 *.pyproj
 .vs/*
 *.db
-
+*.opendb
+*.pyperf

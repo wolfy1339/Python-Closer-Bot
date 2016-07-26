@@ -34,15 +34,16 @@ class TPT(object):
         self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
         self.referer += '?Group={0}'.format(groupId)
         self.session = requests.Session()
-        self.session.cookies = functions.loadCookies(self.session)
+        self.session.cookies = functions.cookies.loadCookies(self.session)
         self.baseUrl = 'http://powdertoy.co.uk/Groups/'
-        self.timeToArray = functions.dates().timeToArray
-        self.daysBetween = functions.dates().daysBetween
-        self.whitelist = functions.whitelist().isWhitelisted
-        self.key = functions.getKey(self.session)
+        self.timeToArray = functions.dates.Dates().timeToArray
+        self.daysBetween = functions.dates.Dates().daysBetween
+        self.whitelist = functions.whitelist.Whitelist().isWhitelisted
+        self.key = functions.general.getKey(self.session)
         self.groupID = groupId
         self.daysUntilLock = daysUntilLock
         self.daysUntilDelete = daysUntilDelete
+        self.loadDataFile = functions.general.loadDataFile
 
     def postRequest(self, url, data, headers=None, params=None, **kwargs):
         """<url> <headers> <POST data> [<URL parameters>]
@@ -152,22 +153,6 @@ class TPT(object):
             json.dump(threadData, t, indent=2, separators=(',', ': '))
         return threadData
 
-    def loadDataFile(self):
-        """No arguments
-
-        Loads the JSON data file and does the correct data transformations
-        if needed
-        """
-        if not os.path.isfile('thread.json'):
-            threadData = self.getThreadData()
-        else:
-            with open('thread.json') as t:
-                threadData = json.load(t)
-
-            if isinstance(threadData, list):
-                raise TypeError('WARNING: Invalid data type!')
-        return threadData
-
     def cleanThreads(self, delete=True, doConfirm=False):
         """No arguments
 
@@ -215,7 +200,7 @@ class TPT(object):
                                                               title))
                 elif self.daysBetween(date) >= self.daysUntilLock:
                     # Lock thread if it isn't already
-                    if not alert:
+                    if not alerted:
                         self.threadPost(self.lockMsg, threadNum, self.key)
                         self.threadModeration('lock', threadNum, self.key)
 

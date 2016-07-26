@@ -30,7 +30,7 @@ class TPT(object):
     def __init__(self, lockmsg=config.tpt.lockmsg, groupId=config.tpt.groupID,
                  daysUntilLock=config.tpt.daysUntilLock,
                  daysUntilDelete=config.tpt.daysUntilDelete):
-        self.lockMsg = ''.join(lockmsg)
+        self.lockMsg = lockmsg
         self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
         self.referer += '?Group={0}'.format(groupId)
         self.session = requests.Session()

@@ -1,7 +1,9 @@
-from main import TPT
-
+"""Command Line Interface for the bot"""
 import os
 import sys
+
+from .main import TPT
+
 path = os.path.dirname(sys.modules[__name__].__file__)
 sys.path.insert(0, os.path.join(path, ".."))
 

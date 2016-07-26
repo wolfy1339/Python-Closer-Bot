@@ -4,10 +4,10 @@ in order to run the automated thread closer bot
 """
 from __future__ import print_function
 
-from bs4 import BeautifulSoup
 import json
 import os
 import requests
+from bs4 import BeautifulSoup
 
 from . import config
 from .confirm import confirm

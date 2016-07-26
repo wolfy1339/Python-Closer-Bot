@@ -19,3 +19,5 @@ def main(arg):
 if __name__ == '__main__':
     # Execute 'main' with all the command line arguments.
     main(sys.argv[1:])
+
+# vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

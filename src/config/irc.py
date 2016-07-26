@@ -19,3 +19,5 @@ ownerHostmasks = ['wolfy1339!~wolfy1339@botters/wolfy1339']
 adminHostmasks = []
 commandChar = '@'
 encoding = 'utf-8'
+
+# vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

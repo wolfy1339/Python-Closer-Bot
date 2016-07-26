@@ -51,3 +51,6 @@ class Dates(object):
         nowDate = str(now.month) + ' ' + str(now.day) + ' ' + str(now.year)
         d2 = datetime.strptime(nowDate + '  1:00AM', '%m %d %Y %I:%M%p')
         return int(abs((d2 - d1).days))
+
+
+# vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

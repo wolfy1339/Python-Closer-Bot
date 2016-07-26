@@ -30,3 +30,6 @@ def getKey(session):
     soup = BeautifulSoup(response.text, 'html5lib').find('ul', arg)
     li = soup.findAll('li', {'class': 'item'})[4]
     return li.find('a')['href'].split('?Key=')[1]
+
+
+# vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

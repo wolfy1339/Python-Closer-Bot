@@ -24,3 +24,5 @@ password = 'BrilliantMinds!',
 username = 'BMNNation',
 whitelist = ['1427', '2202', '2228']
 groupID = '832'
+
+# vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

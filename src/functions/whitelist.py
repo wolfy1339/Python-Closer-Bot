@@ -68,3 +68,6 @@ class Whitelist(object):
         Returns if a given thread is in the whitelist
         """
         return self.binarySearch(self.white, threadNum)
+
+
+# vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

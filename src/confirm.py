@@ -39,3 +39,5 @@ def confirm(question, answer=None):
         else:
             sys.stdout.write('Please respond with \'yes\' or \'no\' '
                              '(or \'y\' or \'n\').\n')
+
+# vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

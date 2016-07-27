@@ -2,6 +2,7 @@
 import os
 import json
 from bs4 import BeautifulSoup
+from . import cookies
 
 
 def loadDataFile():
@@ -24,7 +25,8 @@ def loadDataFile():
 def getKey(session):
     """Used to get the user key in order to post, and do moderation tasks"""
     response = session.get('http://powdertoy.co.uk/Groups/Page/Groups.html')
-    response.raise_for_status()
+    if response.status_code in (401, 403):
+        cookies.getCookies(session)
     arg = {
         'class': 'dropdown-menu'
     }

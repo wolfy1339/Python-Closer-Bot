@@ -8,7 +8,7 @@ from .. import config
 
 def dumpCookies(cookies):
     """Used to dump cookies from a session to a JSON file"""
-    with open('cookies.txt', 'w+') as f:
+    with open('cookies.json', 'w+') as f:
         cookieDict = requests.utils.dict_from_cookiejar(cookies)
         json.dump(cookieDict, f, indent=2, separators=(',', ': '))
 

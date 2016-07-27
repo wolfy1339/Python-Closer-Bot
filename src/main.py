@@ -160,7 +160,7 @@ class TPT(object):
         a given time.
         """
         threadData = self.loadDataFile()
-        for e in list(threadData.keys()):
+        for e in threadData.keys():
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = threadData[e][2]

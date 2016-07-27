@@ -2,6 +2,7 @@
 import json
 import os
 import requests.utils
+import time
 
 from .. import config
 
@@ -9,7 +10,15 @@ from .. import config
 def dumpCookies(cookies):
     """Used to dump cookies from a session to a JSON file"""
     with open('cookies.json', 'w+') as f:
-        cookieDict = requests.utils.dict_from_cookiejar(cookies)
+        cookieDict = {}
+        for i in cookies:
+            if not i.expires is None:
+                cookieDict[i.name] = {}
+                cookieDict[i.name]['value] = i.value
+                cookieDict[i.name]['expires'] = i.expires
+            else:
+                pass
+
         json.dump(cookieDict, f, indent=2, separators=(',', ': '))
 
 
@@ -29,7 +38,15 @@ def loadCookies(session):
     """Used to return cookies loaded from a JSON file"""
     if os.path.isfile('cookies.json'):
         with open('cookies.json') as f:
-            cookies = requests.utils.cookiejar_from_dict(json.load(f))
+            c = json.load(f)
+            d = {}
+            for i in list(c.keys()):
+                if c[i]['expires'] =< time.time():
+                    pass
+                else:
+                    d[i] = c[i]['value']
+
+            cookies = requests.utils.cookiejar_from_dict(d)
             return cookies
     else:
         getCookies(session)

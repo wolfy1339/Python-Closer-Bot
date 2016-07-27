@@ -23,7 +23,8 @@ def loadDataFile():
 
 def getKey(session):
     """Used to get the user key in order to post, and do moderation tasks"""
-    response = session.get('http://powdertoy.co.uk')
+    response = session.get('http://powdertoy.co.uk/Groups/Page/Groups.html')
+    response.raise_for_status()
     arg = {
         'class': 'dropdown-menu'
     }

@@ -11,7 +11,7 @@ class Dates(object):
         """
         data = string.split(' ')
         data[0] = data[0].replace('th', '').replace('st', '')
-        date = data[0].replace('rd', '').replace('nd', '')
+        when = data[0].replace('rd', '').replace('nd', '')
         months = [
             'January',
             'February',
@@ -33,20 +33,20 @@ class Dates(object):
 
         year = now.year
         # If first half is day, so like 1 January
-        if date.isdigit():
-            return [str(date), str(months.index(data[1]) + 1), str(year)]
+        if when.isdigit():
+            return [str(when), str(months.index(data[1]) + 1), str(year)]
         # Format like month - year
-        elif len(date) == 2 and data[1].isdigit():
+        elif len(when) == 2 and data[1].isdigit():
             return ['1', str(months.index(date) + 1), str(data[1])]
         return [str(now.day), '1', str(year)]
 
-    def daysBetween(self, date):
+    def daysBetween(self, when):
         """<date>
 
         Calculate the difference in days between a given date
         and the current UTC date
         """
-        dateFormatted = date[1] + ' ' + date[0] + ' ' + date[2]
+        dateFormatted = when[1] + ' ' + when[0] + ' ' + when[2]
         d1 = date.strftime(dateFormatted, '%m %d %Y')
         now = datetime.utcnow()
         nowDate = str(now.month) + ' ' + str(now.day) + ' ' + str(now.year)

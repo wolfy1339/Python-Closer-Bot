@@ -3,7 +3,8 @@ language: python
 python:
   - 2.7
   - 3.6
+cache: pip
 script:
   - pip install -r requirements.txt
   - pip install pylint flake8
-  - pylint src/*.py --ignore="invalid-name"
+  - pylint src/*.py src/**/*.py --disable="invalid-name"

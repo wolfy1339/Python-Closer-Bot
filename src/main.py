@@ -7,7 +7,7 @@ from __future__ import print_function
 import json
 import os
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs
 
 from . import config
 from .confirm import confirm
@@ -45,13 +45,13 @@ class TPT(object):
         self.daysUntilDelete = daysUntilDelete
         self.loadDataFile = functions.general.loadDataFile
 
-    def postRequest(self, url, data, headers=None, params=None, **kwargs):
+    def _post(self, url, data, headers=None, params=None, **kwargs):
         """<url> <headers> <POST data> [<URL parameters>]
 
         Wrapper function to do a POST request
         """
-        req = self.session.request(
-            'POST', url, headers=headers, data=data, allow_redirects=True,
+        req = self.session.post(
+            url, headers=headers, data=data, allow_redirects=True,
             params=params, **kwargs)
         return req.raise_for_status()
 
@@ -87,8 +87,8 @@ class TPT(object):
         headers = {
             'Referer': ref
         }
-        self.postRequest(moderationURL, headers=headers, data=data,
-                         params=params)
+        self._post(moderationURL, headers=headers, data=data,
+                   params=params)
 
     def threadPost(self, message, threadNum, key):
         """<message> <thread number> <user key>
@@ -111,8 +111,8 @@ class TPT(object):
             'Group': self.groupID,
             'Key': key
         }
-        self.postRequest(threadPostURL, headers=headers, data=data,
-                         params=params)
+        self._post(threadPostURL, headers=headers, data=data,
+                   params=params)
 
     def getThreadData(self):
         """No arguments
@@ -141,13 +141,12 @@ class TPT(object):
             titles = [i.text for i in element]
             threads = [element[i]['href'].split('&Thread=')[1] for i in length]
             dates = soup.find_all('span', {'class': 'Date'})
-            dateArray = [self.timeToArray(i.text) for i in dates]
 
-            for i in length:
-                threadData[threads[i]] = [
-                    titles[i],
-                    dateArray[i],
-                    iconSrc[i].find('Sticky') != -1
+            for n in length:
+                threadData[threads[n]] = [
+                    titles[n],
+                    self.timeToArray(dates[n].text),
+                    iconSrc[n].find('Sticky') != -1
                 ]
         with open('thread.json', 'w+') as t:
             json.dump(threadData, t, indent=2, separators=(',', ': '))
@@ -160,7 +159,7 @@ class TPT(object):
         a given time.
         """
         threadData = self.loadDataFile()
-        for e in threadData.keys():
+        for e in threadData:
             threadNum = threadData[e][0]
             title = threadData[e][1]
             date = threadData[e][2]
@@ -178,13 +177,13 @@ class TPT(object):
             page = self.session.get(groupURL, params=params)
             page.raise_for_status()
             soup = BeautifulSoup(page.text, 'html5lib')
-            alerted = soup.find('div',
+            locked = soup.find('div',
                                 {'class': 'Warning'}) != -1
             msg = 'Would you like to delete thread {0} {1}?'.format(threadNum,
                                                                     title)
             if not self.whitelist(threadNum) and not sticky:
                 if (self.daysBetween(date) >= self.daysUntilDelete and
-                        alerted and delete):
+                        locked and delete):
                     self.threadBackup(threadNum)
                     if doConfirm:
                         if confirm(msg):
@@ -200,7 +199,7 @@ class TPT(object):
                                                               title))
                 elif self.daysBetween(date) >= self.daysUntilLock:
                     # Lock thread if it isn't already
-                    if not alerted:
+                    if not locked:
                         self.threadPost(self.lockMsg, threadNum, self.key)
                         self.threadModeration('lock', threadNum, self.key)
 
@@ -210,7 +209,8 @@ class TPT(object):
         Saves a copy of every thread page in seperate folders for each thread
         """
         # Save pages 0 through 1000
-        for i in list(range(100)):
+        threadData = self.loadDataFile()
+        for e in threadData:
             url = self.baseUrl + 'Thread/View.html'
             # Save the html to a folder under 'backups' named the threadNum
             newpath = r'Backups/' + str(threadNum)
@@ -219,8 +219,7 @@ class TPT(object):
 
             params = {
                 'Group': self.groupID,
-                'Thread': threadNum,
-                'PageNum': i
+                'Thread': threadData[e][0]
             }
 
             # Get html from page replace links with saved copy

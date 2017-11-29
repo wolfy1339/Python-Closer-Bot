@@ -5,4 +5,5 @@ python:
   - 3.6
 script:
   - pip install -r requirements.txt
+  - pip install pylint flake8
   - pylint src/*.py --ignore="invalid-name"

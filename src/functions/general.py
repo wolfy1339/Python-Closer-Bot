@@ -24,7 +24,7 @@ def loadDataFile():
 
 def getKey(session):
     """Used to get the user key in order to post, and do moderation tasks"""
-    response = session.get('http://powdertoy.co.uk/Groups/Page/Groups.html')
+    response = session.get('/Groups/Page/Groups.html')
     if response.status_code in (401, 403):
         cookies.getCookies(session)
     arg = {

@@ -21,7 +21,7 @@ def getCookies(session):
         'Remember': 'Yes'
     }
     session.post(
-        'https://powdertoy.co.uk/Login.html', data=data)
+        '/Login.html', data=data)
     dumpCookies(session.cookies)
     return session.cookies
 

@@ -7,11 +7,13 @@ from __future__ import print_function
 import json
 import os
 import requests
+from requests_toolbelt import sessions
 from bs4 import BeautifulSoup as bs
 
 from . import config
 from .confirm import confirm
-from . import functions
+from .functions.date import Dates
+from .functions.whitelist import Whitelist
 
 # Notice:
 #   * This requires requests & BeutifulSoup4 from pypi,
@@ -21,7 +23,7 @@ from . import functions
 # Please respect point 2 of this notice when contributing.
 
 
-class TPT(object):
+class TPT(Dates, Whitelist):
     """
     A simple bot to automatically lock and delete old threads
     that haven't had any replies
@@ -30,15 +32,13 @@ class TPT(object):
     def __init__(self, lockmsg=config.tpt.lockmsg, groupId=config.tpt.groupID,
                  daysUntilLock=config.tpt.daysUntilLock,
                  daysUntilDelete=config.tpt.daysUntilDelete):
+        super(TPT, self).__init__()
         self.lockMsg = lockmsg
         self.referer = 'http://powdertoy.co.uk/Groups/Thread/View.html'
         self.referer += '?Group={0}'.format(groupId)
-        self.session = requests.Session()
+        self.session = sessions.BaseUrlSession(base_url="http://powdertoy.co.uk")
         self.session.cookies = functions.cookies.loadCookies(self.session)
-        self.baseUrl = 'http://powdertoy.co.uk/Groups/'
-        self.timeToArray = functions.dates.Dates().timeToArray
-        self.daysBetween = functions.dates.Dates().daysBetween
-        self.whitelist = functions.whitelist.Whitelist().isWhitelisted
+        self.baseUrl = '/Groups/'
         self.key = functions.general.getKey(self.session)
         self.groupID = groupId
         self.daysUntilLock = daysUntilLock
@@ -50,8 +50,8 @@ class TPT(object):
 
         Wrapper function to do a POST request
         """
-        req = self.session.post(
-            url, headers=headers, data=data, allow_redirects=True,
+        req = self.session.request(
+            'POST', url, headers=headers, data=data, allow_redirects=True,
             params=params, **kwargs)
         return req.raise_for_status()
 
@@ -119,15 +119,19 @@ class TPT(object):
 
         Gathers data about the threads in the Group
         """
-        for i in list(range(10)):
-            params = {
-                'Group': self.groupID,
-                'PageNum': str(i)
-            }
+        params = {
+            'Group': self.groupID,
+        }
+        page = self.session.get(self.baseUrl + 'Page/View.html',
+                                 params=params)
+        # Get number of pages of threads
+        p = bs(page.text, "html5lib").find("div", {'class': 'Pageheader'}).find_all("li")[-2].string
+        for i in list(range(int(p))):
+            params['PageNum'] = str(i)
             page = self.session.get(self.baseUrl + 'Page/View.html',
                                     params=params)
             page.raise_for_status()
-            soup = BeautifulSoup(page.text, 'html5lib')
+            soup = bs(page.text, 'html5lib')
             threadData = {}
 
             # Get all links in ul.TopiList#TopicList
@@ -143,10 +147,18 @@ class TPT(object):
             dates = soup.find_all('span', {'class': 'Date'})
 
             for n in length:
-                threadData[threads[n]] = [
+                threadNum = threads[n]
+                del params['PageNum']
+                params['Thread'] = threadNum
+                res = self.session.get(self.base_url + 'Thread/View.html', params=params)
+                res.raise_for_status()
+                soup = bs(res.text, 'html5lib')
+                pages = soup.find('div', {'class': 'pagination'}).find_all('li')[-2].string
+                threadData[threadNum] = [
                     titles[n],
                     self.timeToArray(dates[n].text),
-                    iconSrc[n].find('Sticky') != -1
+                    iconSrc[n].find('Sticky') != -1,
+                    int(pages)
                 ]
         with open('thread.json', 'w+') as t:
             json.dump(threadData, t, indent=2, separators=(',', ': '))
@@ -160,14 +172,10 @@ class TPT(object):
         """
         threadData = self.loadDataFile()
         for e in threadData:
-            threadNum = threadData[e][0]
-            title = threadData[e][1]
-            date = threadData[e][2]
-            if isinstance(threadData[e][3], bool):
-                # Check wether the value is True or False (boolean)
-                sticky = threadData[e][3]
-            else:  # If it isn't convert it to a boolean
-                sticky = threadData[e][3].find('Sticky') != -1
+            threadNum = e
+            title = threadData[e][0]
+            date = threadData[e][1]
+            sticky = threadData[e][2] # Check whether this thread is stickied
 
             params = {
                 'Group': self.groupID,
@@ -176,7 +184,7 @@ class TPT(object):
             groupURL = self.baseUrl + 'Thread/View.html'
             page = self.session.get(groupURL, params=params)
             page.raise_for_status()
-            soup = BeautifulSoup(page.text, 'html5lib')
+            soup = bs(page.text, 'html5lib')
             locked = soup.find('div',
                                 {'class': 'Warning'}) != -1
             msg = 'Would you like to delete thread {0} {1}?'.format(threadNum,
@@ -213,23 +221,31 @@ class TPT(object):
         for e in threadData:
             url = self.baseUrl + 'Thread/View.html'
             # Save the html to a folder under 'backups' named the threadNum
+            threadNum = threadData[e][0]
             newpath = r'Backups/' + str(threadNum)
             if not os.path.exists(newpath):
                 os.makedirs(newpath)
 
             params = {
                 'Group': self.groupID,
-                'Thread': threadData[e][0]
+                'Thread': threadNum
             }
 
-            # Get html from page replace links with saved copy
             page = self.session.get(url, params=params)
             page.raise_for_status()
             if page.text.find('<div id="MessageContainer"') == -1:
                 break
-            path = 'Backups/' + threadNum + '/' + 'page-' + str(i) + '.html'
-            with open(path, 'w+') as w:
-                w.write(page.text)
+            # Get page count
+            pages = threadData[3]
+            
+            for i in range(pages):
+                # Don't fetch the first page for nothing
+                if i > 1:
+                    params["PageNum"] = i
+                    page = self.session.get(url, params=params)
+                path = 'Backups/' + threadNum + '/' + 'page-' + str(i) + '.html'
+                with open(path, 'w+') as w:
+                    w.write(page.text)
 
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:
